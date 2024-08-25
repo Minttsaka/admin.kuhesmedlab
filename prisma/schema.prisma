@@ -1,0 +1,295 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Account {
+  id                 String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  email   String   @unique
+  name    String
+  country String
+  bio     String?
+  age     String
+  password String
+  institutionId String
+  institution Institution   @relation(fields: [institutionId], references: [id])
+  department  String?
+  role        String  @default("researcher")
+  emailVerified DateTime?
+  phone        String? 
+  image         String?
+  researchId    String?
+  reviews     Review[]
+  files       File[]
+  research Research[]
+  accounts      Account[]
+  sessions      Session[]
+}
+
+enum ResearchStatus {
+  DEVELOPMENT
+  APPROVED
+  PENDING
+  DISAPPROVED
+}
+
+model Research {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  image       String?
+  creatorId   String
+  keyWords    String
+  field       String
+  abstract      String?
+  researchField  String
+  Published DateTime?
+  publicationDate DateTime?
+  status      ResearchStatus  @default(DEVELOPMENT)
+  doi           String     @unique
+  journal       String
+  conference    String
+  institutionId String
+  tag           Tag[]
+  volume        String?
+  issue         String?
+  downloadCount Int       @default(0)
+  citationCount Int       @default(0)
+  updatedAt     DateTime    @updatedAt
+  creatorName String
+  affiliation String
+  review      Review[]
+  author      Author[]
+  surveys     Survey[]
+  files       File[]
+  authors     Authors[]
+  user        User   @relation(fields: [creatorId], references: [id])
+  institution  Institution @relation(fields: [institutionId], references: [id])
+  collaborator  Collaborator[]
+  reference    Reference[]
+  createdAt   DateTime   @default(now())
+}
+
+model Collaborator {
+  id            String              @id @default(auto()) @map("_id") @db.ObjectId
+  firstName     String
+  lastName      String
+  email         String            @unique
+  affiliation   String
+  role          CollaboratorRole
+  researchId    String
+  research    Research        @relation(fields: [researchId], references: [id])
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+enum CollaboratorRole {
+  LEAD
+  CO_AUTHOR
+  CONTRIBUTOR
+}
+
+model Reference {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  researchId     String 
+  research       Research  @relation(fields: [researchId], references: [id]) 
+  title         String
+  authors       String
+  fullReference String?
+  journal       String?  
+  bookTitle     String?  
+  publisher     String?   
+  volume        String? 
+  issue         String?  
+  pages         String? 
+  year          String?      
+  doi           String?  
+  url           String?  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Authors {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  researchId    String
+  research      Research @relation(fields: [researchId], references:[id])
+}
+
+model File {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  url          String    // URL or path to the file
+  filename     String    // Original file name
+  mimetype     String?    // MIME type of the file (e.g., application/pdf)
+  fileType     String
+  researchId   String
+  research     Research  @relation(fields: [researchId], references: [id])
+  uploadedById String
+  uploadedBy   User      @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Author {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  firstName   String
+  lastName    String
+  email       String   @unique
+  researchId  String
+  affiliation String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  research    Research @relation(fields: [researchId], references: [id])
+}
+
+
+enum QuestionType {
+  Paragraph
+  Multiple_Choice
+  Short_Answer
+  Rating
+}
+
+enum SurveyStatus {
+  draft
+  active
+  archived
+}
+
+model Survey {
+   id         String        @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  label       String
+  status      SurveyStatus  @default(draft)
+  creatorId   String?
+  creatorName String
+  surveyForm  SurveyForm[]
+  researchId  String
+  research     Research    @relation(fields: [researchId], references: [id])
+  createdAt   DateTime   @default(now())
+}
+
+model SurveyForm {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  label       String
+  status      SurveyStatus @default(draft)
+  identity    Boolean
+  guildelines  String
+  creatorId   String
+  creatorName String
+  importance  Importance @default(high)
+  questions   SurveyFormQuestion[]
+  surveyId    String
+  survey      Survey    @relation(fields: [surveyId], references: [id])
+  createdAt   DateTime   @default(now())
+}
+
+enum Importance {
+  low
+  medium
+  high
+}
+
+model SurveyFormQuestion {
+  id       String      @id @default(auto()) @map("_id") @db.ObjectId
+  title    String
+  image    String?
+  type     QuestionType
+  rating   Int?
+  options  Option[]
+  choices  SurveyFormAnswer[]
+  formId   String
+  author   String
+  authorId String
+  form     SurveyForm     @relation(fields: [formId], references: [id])
+  createdAt   DateTime   @default(now())
+}
+
+model Option {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  text       String
+  question   SurveyFormQuestion @relation(fields: [questionId], references: [id])
+  questionId String
+}
+
+model SurveyFormAnswer {
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  answer     String
+  userId     String
+  questionId String
+  question   SurveyFormQuestion @relation(fields: [questionId], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+
+model Tag {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  name      String      @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  researchId  String
+  research    Research @relation(fields: [researchId], references: [id])
+}
+
+model Review {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  researchId   String
+  reviewerId String
+  comment   String?
+  rating    Int?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  research  Research @relation(fields: [researchId], references: [id])
+  reviewer  User          @relation(fields: [reviewerId], references: [id])
+}
+
+model Institution {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  research  Research[]
+  members   User[]
+  location  String
+  type      String
+  website   String?
+  logo   String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
