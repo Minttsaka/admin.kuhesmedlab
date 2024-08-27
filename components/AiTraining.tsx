@@ -22,17 +22,17 @@ export default function Aitraining() {
   const [research, setResearch] = useState({ title: "", sampleSize: 0, pValue: 0, confidenceInterval: 0, peerReviewed: false })
   const [isTraining, setIsTraining] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [validationResult, setValidationResult] = useState(null)
+  const [validationResult, setValidationResult] = useState<boolean>()
   const [trainedModels, setTrainedModels] = useState([
     { id: 1, name: "Sentiment Analysis Model", accuracy: 92.5 },
     { id: 2, name: "Image Classification Model", accuracy: 88.7 },
   ])
 
-  const handleCriteriaChange = (key, value) => {
+  const handleCriteriaChange = (key:string, value:number | boolean) => {
     setCriteria({ ...criteria, [key]: value })
   }
 
-  const handleResearchChange = (key, value) => {
+  const handleResearchChange = (key:string, value:any) => {
     setResearch({ ...research, [key]: value })
   }
 
@@ -268,7 +268,7 @@ export default function Aitraining() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Progress value={progress} className="w-full h-2 bg-indigo-700" indicatorColor="bg-indigo-400" />
+              <Progress value={progress} className="w-full h-2 bg-indigo-700" />
               <p className="text-indigo-300 mt-2 text-center">{Math.round(progress)}% Complete</p>
             </CardContent>
           </Card>

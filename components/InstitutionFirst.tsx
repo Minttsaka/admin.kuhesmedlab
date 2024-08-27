@@ -180,7 +180,7 @@ export default function InstitutionFirst() {
             </CardHeader>
             <CardContent>
               <div className="flex justify-between items-center mb-4">
-                <Badge className={`${typeColors[institution.type]} text-white`}>{institution.type}</Badge>
+                <Badge className={`${typeColors[institution.type as keyof typeof typeColors]} text-white`}>{institution.type}</Badge>
                 <span className="text-sm text-gray-500 dark:text-gray-400">{institution.papers} papers</span>
               </div>
               <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
@@ -228,7 +228,7 @@ export default function InstitutionFirst() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Type</Label>
-                <Badge className={`${typeColors[selectedInstitution?.type]} text-white mt-1`}>{selectedInstitution?.type}</Badge>
+                <Badge className={`${typeColors[selectedInstitution?.type as keyof typeof typeColors]} text-white mt-1`}>{selectedInstitution?.type}</Badge>
               </div>
               <div>
                 <Label>Location</Label>
@@ -236,11 +236,11 @@ export default function InstitutionFirst() {
               </div>
               <div>
                 <Label>Papers</Label>
-                <p className="mt-1">{selectedInstitution?.papers}</p>
+                <p className="mt-1">{selectedInstitution?.name}</p>
               </div>
               <div>
                 <Label>Researchers</Label>
-                <p className="mt-1">{selectedInstitution?.researchers}</p>
+                <p className="mt-1">{selectedInstitution?.name}</p>
               </div>
             </div>
             <div>

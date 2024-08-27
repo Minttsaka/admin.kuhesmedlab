@@ -9,13 +9,9 @@ export default async function page({params:{id}}:{params:{id:string}}) {
   const [researchList , research ] = await prisma.$transaction([
 
     prisma.research.findMany({
-      where:{
-        publicationDate:null,
-        status:"PENDING"
-      },
+  
       include:{
         user:true,
-        authors:true
       }
     }),
 
@@ -39,7 +35,6 @@ export default async function page({params:{id}}:{params:{id:string}}) {
             }
           }
         },
-        authors:true,
         files:true,
         user:true,
         institution:true,
@@ -49,6 +44,8 @@ export default async function page({params:{id}}:{params:{id:string}}) {
     })
 
   ])
+
+  console.log(researchList)
 
  
   return (

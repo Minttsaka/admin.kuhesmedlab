@@ -1,6 +1,6 @@
 
 "use client"
-import { useState } from "react"
+import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,31 +26,32 @@ export default function ProfileFirst() {
     theme: "system",
   })
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e:React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setUser((prevUser) => ({ ...prevUser, [name]: value }))
   }
 
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setUser((prevUser) => ({ ...prevUser, avatar: reader.result }))
-      }
-      reader.readAsDataURL(file)
-    }
-  }
+  // const handleAvatarChange = (e:any) => {
+  //   const file = e.target.files[0]
+  //   if (file) {
+  //     const reader = new FileReader()
+  //     reader.onloadend = () => {
+        
+  //       setUser((prevUser) => ({ ...prevUser, avatar: reader.result }))
+  //     }
+  //     reader.readAsDataURL(file)
+  //   }
+  // }
 
-  const handleSwitchChange = (checked) => {
+  const handleSwitchChange = (checked:boolean) => {
     setUser((prevUser) => ({ ...prevUser, notifications: checked }))
   }
 
-  const handleThemeChange = (value) => {
+  const handleThemeChange = (value:any) => {
     setUser((prevUser) => ({ ...prevUser, theme: value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e:React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault()
     console.log("Updated user data:", user)
     alert("User information updated successfully!")
@@ -107,7 +108,7 @@ export default function ProfileFirst() {
                         id="avatar-upload"
                         type="file"
                         accept="image/*"
-                        onChange={handleAvatarChange}
+                        //onChange={handleAvatarChange}
                         className="w-full"
                       />
                     </div>
@@ -139,7 +140,7 @@ export default function ProfileFirst() {
                     id="bio"
                     name="bio"
                     value={user.bio}
-                    onChange={handleInputChange}
+                    //onChange={handleInputChange}
                     className="min-h-[100px]"
                   />
                 </div>
@@ -214,7 +215,7 @@ export default function ProfileFirst() {
               <ScrollArea className="h-[400px] w-full rounded-md border p-4">
                 {[1, 2, 3].map((survey) => (
                   <div key={survey} className="mb-4 last:mb-0 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <h3 className="text-lg font-semibold">Healthcare Professional's Perception of AI in Medicine</h3>
+                    <h3 className="text-lg font-semibold">Healthcare Professionals Perception of AI in Medicine</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Status: Ongoing | Responses: 1,234</p>
                     <progress className="w-full mt-2" value="65" max="100"></progress>
                     <p className="mt-2 text-sm">This survey aims to understand the perception and readiness of healthcare professionals in adopting AI-powered tools in their practice.</p>

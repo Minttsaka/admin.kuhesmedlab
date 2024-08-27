@@ -77,13 +77,12 @@ model Research {
   keyWords    String
   field       String
   abstract      String?
-  researchField  String
   Published DateTime?
   publicationDate DateTime?
   status      ResearchStatus  @default(DEVELOPMENT)
-  doi           String     @unique
-  journal       String
-  conference    String
+  doi           String?
+  journal       String?
+  conference    String?
   institutionId String
   tag           Tag[]
   volume        String?
@@ -94,10 +93,9 @@ model Research {
   creatorName String
   affiliation String
   review      Review[]
-  author      Author[]
   surveys     Survey[]
+  authors     String
   files       File[]
-  authors     Authors[]
   user        User   @relation(fields: [creatorId], references: [id])
   institution  Institution @relation(fields: [institutionId], references: [id])
   collaborator  Collaborator[]
@@ -144,13 +142,6 @@ model Reference {
   updatedAt     DateTime  @updatedAt
 }
 
-model Authors {
-  id           String    @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  researchId    String
-  research      Research @relation(fields: [researchId], references:[id])
-}
-
 model File {
   id           String    @id @default(auto()) @map("_id") @db.ObjectId
   url          String    // URL or path to the file
@@ -164,19 +155,6 @@ model File {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
-
-model Author {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  firstName   String
-  lastName    String
-  email       String   @unique
-  researchId  String
-  affiliation String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  research    Research @relation(fields: [researchId], references: [id])
-}
-
 
 enum QuestionType {
   Paragraph

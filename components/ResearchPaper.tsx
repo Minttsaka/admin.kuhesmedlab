@@ -32,14 +32,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Prisma } from '@prisma/client'
+import { Prisma, Research } from '@prisma/client'
 
-export type ResearchWithAllRelations = Prisma.ResearchGetPayload<{
-  include: {
-    authors: true;
-    
-  };
-}>;
+
 const statusColors = {
   DEVELOPMENT: "bg-green-500",
   APPROVED: "bg-yellow-500",
@@ -47,20 +42,21 @@ const statusColors = {
   DISAPPROVED: "bg-red-500",
 }
 
-export default function ResearchPaper({research}:{research:ResearchWithAllRelations[]}) {
-  const [selectedPaper, setSelectedPaper] = useState<ResearchWithAllRelations | null>()
+export default function ResearchPaper({research}:{research:Research[]}) {
+  const [selectedPaper, setSelectedPaper] = useState<Research | null>()
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("All")
   const [fieldFilter, setFieldFilter] = useState("All")
 
   const filteredPapers =research?.filter(paper => 
     (paper.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     paper.authors.some(author => author.name.toLowerCase().includes(searchTerm.toLowerCase()))) &&
+     paper.authors.split(",").map(author => author.trim())
+     .some(author => author.toLowerCase().includes(searchTerm.toLowerCase()))) &&
     (statusFilter === "All" || paper.status === statusFilter) &&
     (fieldFilter === "All" || paper.affiliation === fieldFilter)
   )
 
-  const handleStatusChange = (paperId:string, newStatus:string) => {
+  const handleStatusChange = (paperId:string | undefined, newStatus:string | undefined) => {
     // Implement status change logic here
     console.log(`Changed status of paper ${paperId} to ${newStatus}`)
   }
@@ -132,9 +128,9 @@ export default function ResearchPaper({research}:{research:ResearchWithAllRelati
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex -space-x-2 overflow-hidden">
-                        {paper.authors.map((author, index) => (
+                        {paper.authors.split(",").map(author => author.trim()).map((author, index) => (
                           <Avatar key={index} className="inline-block border-2 border-white dark:border-gray-800">
-                            <AvatarFallback>{author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                            <AvatarFallback>{author.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                           </Avatar>
                         ))}
                       </div>
@@ -164,14 +160,40 @@ export default function ResearchPaper({research}:{research:ResearchWithAllRelati
                             <span>Download</span>
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onSelect={() => handleStatusChange(paper.id, "Approved")}>
-                            <Check className="mr-2 h-4 w-4" />
-                            <span>Approve</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onSelect={() => handleStatusChange(paper.id, "Disapproved")}>
-                            <X className="mr-2 h-4 w-4" />
-                            <span>Disapprove</span>
-                          </DropdownMenuItem>
+                          {
+                            selectedPaper?.status==="PENDING" && 
+                            <>
+                              <DropdownMenuItem onSelect={() => handleStatusChange(paper.id, "Approved")}>
+                              <Check className="mr-2 h-4 w-4" />
+                              <span>Approve</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => handleStatusChange(paper.id, "Disapproved")}>
+                              <X className="mr-2 h-4 w-4" />
+                              <span>Disapprove</span>
+                            </DropdownMenuItem>
+                          </>
+                          }
+
+{
+                            selectedPaper?.status==="APPROVED" && 
+                            <>
+                            <DropdownMenuItem onSelect={() => handleStatusChange(paper.id, "Disapproved")}>
+                              <X className="mr-2 h-4 w-4" />
+                              <span>Disapprove</span>
+                            </DropdownMenuItem>
+                          </>
+                          }
+
+{
+                            selectedPaper?.status==="DISAPPROVED" && 
+                            <>
+                              <DropdownMenuItem onSelect={() => handleStatusChange(paper.id, "Approved")}>
+                              <Check className="mr-2 h-4 w-4" />
+                              <span>Approve</span>
+                            </DropdownMenuItem>
+                          </>
+                          }
+                          
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
@@ -193,13 +215,13 @@ export default function ResearchPaper({research}:{research:ResearchWithAllRelati
                   </div>
                   <div className="flex items-center mb-4">
                     <div className="flex -space-x-2 overflow-hidden mr-2">
-                      {paper.authors.map((author, index) => (
+                      {paper.authors.split(",").map(author => author.trim()).map((author, index) => (
                         <Avatar key={index} className="inline-block border-2 border-white dark:border-gray-800">
-                          <AvatarFallback>{author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          <AvatarFallback>{author.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                         </Avatar>
                       ))}
                     </div>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">{paper.authors.join(', ')}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">{paper.authors.split(",").map(author => author.trim()).join(', ')}</span>
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">{paper.abstract}</p>
                   <div className="flex justify-between items-center">
@@ -251,11 +273,11 @@ export default function ResearchPaper({research}:{research:ResearchWithAllRelati
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <span className="font-medium">Status:</span>
-              <Badge className={`${statusColors[selectedPaper?.status]} text-white col-span-3`}>{selectedPaper?.status}</Badge>
+              <Badge className={`${statusColors[selectedPaper?.status as keyof typeof statusColors]} text-white col-span-3`}>{selectedPaper?.status}</Badge>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <span className="font-medium">Authors:</span>
-              <span className="col-span-3">{selectedPaper?.authors.join(', ')}</span>
+              <span className="col-span-3">{selectedPaper?.authors.split(",").map(author => author.trim()).join(', ')}</span>
             </div>
             <div className="grid grid-cols-4 items-start gap-4">
               <span className="font-medium">Abstract:</span>
@@ -263,11 +285,34 @@ export default function ResearchPaper({research}:{research:ResearchWithAllRelati
             </div>
           </div>
           <div className="flex justify-between">
+          {
+                            selectedPaper?.status==="PENDING" && 
+                            <>
+                              <DropdownMenuItem onSelect={() => handleStatusChange(selectedPaper.id, "Approved")}>
+                              <Check className="mr-2 h-4 w-4" />
+                              <span>Approve</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => handleStatusChange(selectedPaper.id, "Disapproved")}>
+                              <X className="mr-2 h-4 w-4" />
+                              <span>Disapprove</span>
+                            </DropdownMenuItem>
+                          </>
+                          }
+
+{
+                            selectedPaper?.status==="APPROVED" && 
+                            <div>
+                            <Button variant="destructive" onClick={() => handleStatusChange(selectedPaper?.id, "Disapproved")}>Disapprove</Button>
+                          </div>
+                          }
+
+{
+                            selectedPaper?.status==="DISAPPROVED" && 
+                     
+                              <Button className="mr-2" onClick={() => handleStatusChange(selectedPaper?.id, "Approved")}>Approve</Button>
+                     
+                          }
             <Button variant="outline" onClick={() => setSelectedPaper(null)}>Close</Button>
-            <div>
-              <Button className="mr-2" onClick={() => handleStatusChange(selectedPaper?.id, "Approved")}>Approve</Button>
-              <Button variant="destructive" onClick={() => handleStatusChange(selectedPaper?.id, "Disapproved")}>Disapprove</Button>
-            </div>
           </div>
         </DialogContent>
       </Dialog>

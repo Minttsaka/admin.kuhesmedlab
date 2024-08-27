@@ -6,6 +6,11 @@ export default async function page() {
 
   const admins = await prisma.user.findMany({
 
+    where:{
+      role:{
+        not:'researcher'
+      }
+    },
     include: {
       research: true
     },

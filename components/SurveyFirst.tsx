@@ -41,8 +41,17 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
+type Survey = {
+  id: number;
+  title: string;
+  researchPaper: string;
+  status: "Active" | "Inactive" | "Archived" |"Draft"; // Assuming status can have limited string values
+  questions: number;
+  responses: number;
+  createdDate: string; // Assuming `created` is a Date object
+};
 
-const surveys = [
+const surveys: Survey[] = [
   {
     id: 1,
     title: "Patient Satisfaction in Telemedicine",
@@ -90,7 +99,7 @@ const statusColors = {
 export default function SurveyFirst() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("All")
-  const [selectedSurvey, setSelectedSurvey] = useState(null)
+  const [selectedSurvey, setSelectedSurvey] = useState<Survey>()
   const [isCreateSurveyOpen, setIsCreateSurveyOpen] = useState(false)
 
   const filteredSurveys = surveys.filter(survey => 
@@ -99,7 +108,7 @@ export default function SurveyFirst() {
     (statusFilter === "All" || survey.status === statusFilter)
   )
 
-  const handleStatusChange = (surveyId, newStatus) => {
+  const handleStatusChange = (surveyId:number, newStatus:any) => {
     // Implement status change logic here
     console.log(`Changed status of survey ${surveyId} to ${newStatus}`)
   }
@@ -146,7 +155,7 @@ export default function SurveyFirst() {
             </CardHeader>
             <CardContent>
               <div className="flex justify-between items-center mb-4">
-                <Badge className={`${statusColors[survey.status]} text-white`}>{survey.status}</Badge>
+                <Badge className={`${statusColors[survey.status as keyof typeof statusColors]} text-white`}>{survey.status}</Badge>
                 <span className="text-sm text-gray-500 dark:text-gray-400">Created: {survey.createdDate}</span>
               </div>
               <div className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
@@ -184,7 +193,7 @@ export default function SurveyFirst() {
         ))}
       </div>
 
-      <Dialog open={!!selectedSurvey} onOpenChange={() => setSelectedSurvey(null)}>
+      <Dialog open={!!selectedSurvey} >
         <DialogContent className="sm:max-w-[625px]">
           <DialogHeader>
             <DialogTitle>{selectedSurvey?.title}</DialogTitle>
@@ -196,7 +205,7 @@ export default function SurveyFirst() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Status</Label>
-                <Badge className={`${statusColors[selectedSurvey?.status]} text-white mt-1`}>{selectedSurvey?.status}</Badge>
+                <Badge className={`${statusColors[selectedSurvey?.status as keyof typeof selectedSurvey]} text-white mt-1`}>{selectedSurvey?.status}</Badge>
               </div>
               <div>
                 <Label>Created Date</Label>
@@ -226,7 +235,7 @@ export default function SurveyFirst() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedSurvey(null)}>Close</Button>
+            <Button variant="outline" >Close</Button>
             <Button>Edit Survey</Button>
           </DialogFooter>
         </DialogContent>

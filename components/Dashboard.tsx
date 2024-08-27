@@ -6,9 +6,10 @@ import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts'
 import { SunIcon, MoonIcon, TrendingUpIcon, DownloadIcon, UsersIcon, GlobeIcon } from 'lucide-react'
+import { Research } from '@prisma/client'
 
 // Enhanced mock data
-const researchPapers = [
+const research = [
   { id: 1, title: "Quantum Entanglement in Neural Networks", author: "Dr. Alice Johnson", year: 2023, citations: 89, downloads: 3420, impact: 9.2 },
   { id: 2, title: "Bioremediation Techniques for Plastic Pollution", author: "Prof. Bob Smith", year: 2022, citations: 132, downloads: 5150, impact: 8.7 },
   { id: 3, title: "AI-Driven Personalized Medicine", author: "Dr. Carol Williams", year: 2023, citations: 76, downloads: 2980, impact: 8.9 },
@@ -16,7 +17,7 @@ const researchPapers = [
   { id: 5, title: "Neuroplasticity in Adult Learning", author: "Prof. Eve Davis", year: 2022, citations: 118, downloads: 4270, impact: 8.4 },
 ]
 
-const generateTimeSeriesData = (months, baseValue, trend, volatility) => {
+const generateTimeSeriesData = (months:number, baseValue:number, trend:number, volatility:number) => {
   return Array.from({ length: months }, (_, i) => {
     const trendValue = baseValue + (trend * i)
     const random = (Math.random() - 0.5) * 2 * volatility
@@ -24,7 +25,7 @@ const generateTimeSeriesData = (months, baseValue, trend, volatility) => {
   })
 }
 
-const generateChartData = (paper) => {
+const generateChartData = (paper:Research) => {
   const citationData = generateTimeSeriesData(24, 10, 4, 10).map((value, index) => ({
     month: `Month ${index + 1}`,
     citations: value
@@ -44,8 +45,8 @@ const generateChartData = (paper) => {
   ]
 
   const impactMetrics = [
-    { subject: 'Citations', A: paper.citations, fullMark: 150 },
-    { subject: 'Downloads', A: paper.downloads / 50, fullMark: 150 },
+    { subject: 'Citations', A: paper.citationCount, fullMark: 150 },
+    { subject: 'Downloads', A: paper.downloadCount / 50, fullMark: 150 },
     { subject: 'Social Media', A: Math.random() * 100 + 50, fullMark: 150 },
     { subject: 'News Mentions', A: Math.random() * 50 + 10, fullMark: 150 },
     { subject: 'Policy Citations', A: Math.random() * 30 + 5, fullMark: 150 },
@@ -56,8 +57,8 @@ const generateChartData = (paper) => {
 
 const COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8']
 
-export default function Component() {
-  const [selectedPaper, setSelectedPaper] = useState(researchPapers[0])
+export default function Dashboard({research}:{research:Research[]}) {
+  const [selectedPaper, setSelectedPaper] = useState<Research>(research[0])
   const [darkMode, setDarkMode] = useState(false)
   const { citationData, downloadData, subjectAreaData, impactMetrics } = generateChartData(selectedPaper)
 
@@ -80,7 +81,7 @@ export default function Component() {
             <CardContent>
               <ScrollArea className="h-[80vh]">
                 <AnimatePresence>
-                  {researchPapers.map((paper) => (
+                  {research.map((paper) => (
                     <motion.div
                       key={paper.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -93,15 +94,18 @@ export default function Component() {
                       onClick={() => setSelectedPaper(paper)}
                     >
                       <h3 className="font-semibold">{paper.title}</h3>
-                      <p className="text-sm">{paper.author}, {paper.year}</p>
+                      <p className="text-sm">
+                        {paper.authors.split(",").map(author => author.trim()).map((author, index) => (
+                          <span key={author}>{author}</span>
+                        ))}, {paper.Published?.toDateString()}</p>
                       <div className="flex justify-between mt-2">
                         <Badge variant="secondary" className="flex items-center">
                           <TrendingUpIcon className="w-3 h-3 mr-1" />
-                          {paper.citations}
+                          {paper.citationCount}
                         </Badge>
                         <Badge variant="secondary" className="flex items-center">
                           <DownloadIcon className="w-3 h-3 mr-1" />
-                          {paper.downloads}
+                          {paper.downloadCount}
                         </Badge>
                       </div>
                     </motion.div>
@@ -114,18 +118,20 @@ export default function Component() {
             <Card className="bg-gradient-to-br from-card to-background">
               <CardHeader>
                 <CardTitle>{selectedPaper.title}</CardTitle>
-                <CardDescription>{selectedPaper.author}, {selectedPaper.year}</CardDescription>
+                <CardDescription>{selectedPaper.authors.split(",").map(author => author.trim()).map((author, index) => (
+                          <span key={author}>{author}</span>
+                        ))}, {selectedPaper.Published?.toDateString()}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="flex flex-col items-center justify-center p-4 bg-primary/10 rounded-lg">
                     <TrendingUpIcon className="w-8 h-8 mb-2 text-primary" />
-                    <span className="text-2xl font-bold">{selectedPaper.citations}</span>
+                    <span className="text-2xl font-bold">{selectedPaper.citationCount}</span>
                     <span className="text-sm">Total Citations</span>
                   </div>
                   <div className="flex flex-col items-center justify-center p-4 bg-secondary/10 rounded-lg">
                     <DownloadIcon className="w-8 h-8 mb-2 text-secondary" />
-                    <span className="text-2xl font-bold">{selectedPaper.downloads}</span>
+                    <span className="text-2xl font-bold">{selectedPaper.downloadCount}</span>
                     <span className="text-sm">Total Downloads</span>
                   </div>
                   <div className="flex flex-col items-center justify-center p-4 bg-accent/10 rounded-lg">
@@ -135,7 +141,7 @@ export default function Component() {
                   </div>
                   <div className="flex flex-col items-center justify-center p-4 bg-muted/10 rounded-lg">
                     <GlobeIcon className="w-8 h-8 mb-2 text-muted-foreground" />
-                    <span className="text-2xl font-bold">{selectedPaper.impact.toFixed(1)}</span>
+                    <span className="text-2xl font-bold">{selectedPaper.issue}</span>
                     <span className="text-sm">Impact Factor</span>
                   </div>
                 </div>

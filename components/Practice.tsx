@@ -73,7 +73,7 @@ const researchPapers = [
   { id: 5, title: "Neuroplasticity in Adult Learning", author: "Prof. Eve Davis", year: 2022, citations: 118, downloads: 4270, impact: 8.4 },
 ]
 
-const generateTimeSeriesData = (months, baseValue, trend, volatility) => {
+const generateTimeSeriesData = (months:number, baseValue:number, trend:number, volatility:number) => {
   return Array.from({ length: months }, (_, i) => {
     const trendValue = baseValue + (trend * i)
     const random = (Math.random() - 0.5) * 2 * volatility

@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Switch } from "@/components/ui/switch"
-import { ChevronRight, ChevronLeft, Home, FileText,Building, Users, BarChart2, Book, Calendar, Settings, HelpCircle, LogOut } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Home, FileText,Building, Users, BarChart2, Book, Calendar, Settings, HelpCircle, LogOut, LucideProps } from 'lucide-react'
 
 
 
@@ -20,7 +20,7 @@ export default function GlobalSideBar() {
     // In a real application, you'd apply the theme change here
   }
 
-  const NavItem = ({ icon: Icon, children, href }) => {
+  const NavItem = ({ icon: Icon, children, href }:{ icon:React.FC<LucideProps>, children:React.ReactNode, href:string }) => {
    
     return(
     

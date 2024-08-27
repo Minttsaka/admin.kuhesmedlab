@@ -8,9 +8,6 @@ export default async function page() {
     orderBy:{
       createdAt:"desc"
     },
-    include:{
-      authors:true
-    }
   })
 
   console.log(research)

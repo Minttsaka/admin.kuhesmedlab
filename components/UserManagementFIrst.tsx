@@ -252,7 +252,7 @@ export default function ManagementFirst({admins}:{admins:UserWithPublishedResear
             <div>
               <Label>Recent Activity</Label>
               <ul className="mt-2 space-y-2">
-                <li className="text-sm">Submitted a new paper: "AI in Medical Imaging"</li>
+                <li className="text-sm">Submitted a new paper: AI in Medical Imaging</li>
                 <li className="text-sm">Reviewed 3 papers this month</li>
                 <li className="text-sm">Updated profile information</li>
               </ul>

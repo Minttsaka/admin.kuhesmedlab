@@ -50,7 +50,7 @@ export default function SingleSideBarResearchList({research, id }:{research:Rese
           </Tabs>
           <ScrollArea className="h-[calc(100vh-10rem)]">
             {filteredProjects.map((project) => (
-              <Link href={`/a/research/${project.id}`} key={project.id}>
+              <Link href={`/a/research-papers/${project.id}`} key={project.id}>
                 <button
                   className={`flex w-full items-center justify-between rounded-lg p-2 text-left hover:bg-accent ${
                     id === project.id ? "bg-accent" : ""
@@ -63,7 +63,7 @@ export default function SingleSideBarResearchList({research, id }:{research:Rese
                     </Avatar>
                     <div>
                       <span className="text-sm font-medium">{project.title}</span>
-                      <p className="text-xs text-muted-foreground">{project.authors.map(author=>(<span>{author.name}, </span>))}</p>
+                      <p className="text-xs text-muted-foreground">{project.authors.split(",").map(author => author.trim()).map(author=>(<span key={author}>{author}, </span>))}</p>
                     </div>
                   </div>
                   <ChevronRight className="h-4 w-4" />

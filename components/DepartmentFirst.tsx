@@ -18,7 +18,7 @@ export default function DepartmentFirst() {
   ])
   const [newDepartment, setNewDepartment] = useState("")
   const [newRole, setNewRole] = useState("")
-  const [selectedDepartment, setSelectedDepartment] = useState(null)
+  const [selectedDepartment, setSelectedDepartment] = useState<any>(null)
 
   const handleAddDepartment = () => {
     if (newDepartment.trim() !== "") {
@@ -39,14 +39,14 @@ export default function DepartmentFirst() {
     }
   }
 
-  const handleRemoveDepartment = (id) => {
+  const handleRemoveDepartment = (id:number) => {
     setDepartments(departments.filter(dept => dept.id !== id))
     if (selectedDepartment && selectedDepartment.id === id) {
       setSelectedDepartment(null)
     }
   }
 
-  const handleRemoveRole = (deptId, role) => {
+  const handleRemoveRole = (deptId:number, role:string) => {
     const updatedDepartments = departments.map(dept =>
       dept.id === deptId
         ? { ...dept, roles: dept.roles.filter(r => r !== role) }

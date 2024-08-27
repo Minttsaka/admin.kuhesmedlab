@@ -38,11 +38,11 @@ export default function Notifications() {
     return matchesSearch && matchesFilter
   })
 
-  const markAsRead = (id) => {
+  const markAsRead = (id:number) => {
     setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n))
   }
 
-  const deleteNotification = (id) => {
+  const deleteNotification = (id:number) => {
     setNotifications(notifications.filter(n => n.id !== id))
   }
 
@@ -51,7 +51,7 @@ export default function Notifications() {
   }
 
   useEffect(() => {
-    const handleEsc = (event) => {
+    const handleEsc = (event:KeyboardEvent) => {
       if (event.keyCode === 27) setIsOpen(false)
     }
     window.addEventListener('keydown', handleEsc)
@@ -128,9 +128,9 @@ export default function Notifications() {
                       } hover:bg-gray-700 transition-colors duration-200`}
                     >
                       <div className="flex items-start space-x-4">
-                        <div className={`p-2 rounded-full bg-${notificationTypes[notification.type].color}-500 bg-opacity-20`}>
-                          {React.createElement(notificationTypes[notification.type].icon, {
-                            className: `h-6 w-6 text-${notificationTypes[notification.type].color}-400`
+                        <div className={`p-2 rounded-full bg-${notificationTypes[notification.type as keyof typeof notificationTypes].color}-500 bg-opacity-20`}>
+                          {React.createElement(notificationTypes[notification.type as keyof typeof notificationTypes].icon, {
+                            className: `h-6 w-6 text-${notificationTypes[notification.type as keyof typeof notificationTypes].color}-400`
                           })}
                         </div>
                         <div className="flex-grow">

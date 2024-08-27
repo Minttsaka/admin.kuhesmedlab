@@ -13,6 +13,7 @@ import { Prisma } from "@prisma/client"
 import Practice from "./Practice"
 import RelatedResearchList from "./RelatedResearchList"
 import ResearchReferencesSection from "./ResearchReference"
+import Approve from "./Approve"
 
 export type ResearchWithAllRelations = Prisma.ResearchGetPayload<{
   include: {
@@ -154,6 +155,7 @@ export default function SingleResearch({research}:{research:ResearchWithAllRelat
         />
         <RelatedResearchList title={research?.title!} />
         <ResearchReferencesSection reference={research?.reference!} />
+        <Approve id={research?.id!} />
 
       </div>
     </div>
