@@ -57,10 +57,13 @@ model User {
   researchId    String?
   reviews     Review[]
   files       File[]
+  departments  Department[]
+  roles       Roles[]
   research Research[]
   notifications  Notification[]
   accounts      Account[]
   sessions      Session[]
+  createdAt     DateTime    @default(now())
 }
 
 enum ResearchStatus {
@@ -292,3 +295,21 @@ enum NotificationStatus {
   READ
 }
 
+model Department {
+  id     String        @id @default(auto()) @map("_id") @db.ObjectId
+  name   String
+  userId  String
+  createdBy User @relation(fields: [userId], references: [id])
+  role    Roles[]
+  createdAt     DateTime    @default(now())
+}
+
+model Roles {
+  id     String        @id @default(auto()) @map("_id") @db.ObjectId
+  name   String
+  departmentId    String
+  userId  String
+  createdBy User @relation(fields: [userId], references: [id])
+  department      Department @relation(fields: [departmentId], references: [id])
+  createdAt     DateTime    @default(now())
+}
