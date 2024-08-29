@@ -39,26 +39,38 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+
+enum UserRole {
+  ADMIN
+  RESEARCHER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
 model User {
   id      String   @id @default(auto()) @map("_id") @db.ObjectId
   email   String   @unique
   name    String
   country String
+  gender  Gender
   bio     String?
   age     String
   password String
   institutionId String
-  institution Institution   @relation(fields: [institutionId], references: [id])
-  department  String?
-  role        String  @default("researcher")
+  institution Institution   @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  role        UserRole  @default(RESEARCHER)
   emailVerified DateTime?
   phone        String? 
   image         String?
   researchId    String?
   reviews     Review[]
   files       File[]
-  departments  Department[]
-  roles       Roles[]
+  departmentId  String?
+  departments  Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  authority       String?
   research Research[]
   notifications  Notification[]
   accounts      Account[]
@@ -100,8 +112,8 @@ model Research {
   surveys     Survey[]
   authors     String
   files       File[]
-  user        User   @relation(fields: [creatorId], references: [id])
-  institution  Institution @relation(fields: [institutionId], references: [id])
+  user        User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  institution  Institution @relation(fields: [institutionId], references: [id], onDelete: Cascade)
   collaborator  Collaborator[]
   reference    Reference[]
   createdAt   DateTime   @default(now())
@@ -115,7 +127,7 @@ model Collaborator {
   affiliation   String
   role          CollaboratorRole
   researchId    String
-  research    Research        @relation(fields: [researchId], references: [id])
+  research    Research        @relation(fields: [researchId], references: [id], onDelete: Cascade)
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 }
@@ -129,7 +141,7 @@ enum CollaboratorRole {
 model Reference {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   researchId     String 
-  research       Research  @relation(fields: [researchId], references: [id]) 
+  research       Research  @relation(fields: [researchId], references: [id], onDelete: Cascade) 
   title         String
   authors       String
   fullReference String?
@@ -153,9 +165,11 @@ model File {
   mimetype     String?    // MIME type of the file (e.g., application/pdf)
   fileType     String
   researchId   String
-  research     Research  @relation(fields: [researchId], references: [id])
+  contentId    String
+  content      Content    @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  research     Research  @relation(fields: [researchId], references: [id], onDelete: Cascade)
   uploadedById String
-  uploadedBy   User      @relation(fields: [uploadedById], references: [id])
+  uploadedBy   User      @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
@@ -183,7 +197,7 @@ model Survey {
   creatorName String
   surveyForm  SurveyForm[]
   researchId  String
-  research     Research    @relation(fields: [researchId], references: [id])
+  research     Research    @relation(fields: [researchId], references: [id], onDelete: Cascade)
   createdAt   DateTime   @default(now())
 }
 
@@ -200,7 +214,7 @@ model SurveyForm {
   importance  Importance @default(high)
   questions   SurveyFormQuestion[]
   surveyId    String
-  survey      Survey    @relation(fields: [surveyId], references: [id])
+  survey      Survey    @relation(fields: [surveyId], references: [id], onDelete: Cascade)
   createdAt   DateTime   @default(now())
 }
 
@@ -221,14 +235,14 @@ model SurveyFormQuestion {
   formId   String
   author   String
   authorId String
-  form     SurveyForm     @relation(fields: [formId], references: [id])
+  form     SurveyForm     @relation(fields: [formId], references: [id], onDelete: Cascade)
   createdAt   DateTime   @default(now())
 }
 
 model Option {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   text       String
-  question   SurveyFormQuestion @relation(fields: [questionId], references: [id])
+  question   SurveyFormQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId String
 }
 
@@ -237,7 +251,7 @@ model SurveyFormAnswer {
   answer     String
   userId     String
   questionId String
-  question   SurveyFormQuestion @relation(fields: [questionId], references: [id])
+  question   SurveyFormQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
 }
 
@@ -248,7 +262,7 @@ model Tag {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   researchId  String
-  research    Research @relation(fields: [researchId], references: [id])
+  research    Research @relation(fields: [researchId], references: [id], onDelete: Cascade)
 }
 
 model Review {
@@ -259,8 +273,8 @@ model Review {
   rating    Int?
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
-  research  Research @relation(fields: [researchId], references: [id])
-  reviewer  User          @relation(fields: [reviewerId], references: [id])
+  research  Research @relation(fields: [researchId], references: [id], onDelete: Cascade)
+  reviewer  User          @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
 }
 
 model Institution {
@@ -283,7 +297,7 @@ model Notification {
   senderId    String
   title       String
   description String
-  to            User          @relation(fields: [receiverId], references: [id])
+  to            User          @relation(fields: [receiverId], references: [id], onDelete: Cascade)
   status        NotificationStatus
   content       String
   createdAt     DateTime    @default(now())
@@ -297,9 +311,9 @@ enum NotificationStatus {
 
 model Department {
   id     String        @id @default(auto()) @map("_id") @db.ObjectId
-  name   String
-  userId  String
-  createdBy User @relation(fields: [userId], references: [id])
+  name   String        @unique
+  createdBy String
+  user User[]
   role    Roles[]
   createdAt     DateTime    @default(now())
 }
@@ -308,8 +322,55 @@ model Roles {
   id     String        @id @default(auto()) @map("_id") @db.ObjectId
   name   String
   departmentId    String
-  userId  String
-  createdBy User @relation(fields: [userId], references: [id])
-  department      Department @relation(fields: [departmentId], references: [id])
+  department      Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   createdAt     DateTime    @default(now())
+}
+
+model Content {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  image        String?
+  video         String?
+  creatorId    String
+  creatorName   String
+  creatorImage   String?
+  creatorRole   String
+  category      String
+  files         File[]
+  slug        String   @unique
+  body        String
+  type        ContentType
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum ContentType {
+  BLOG
+  ANNOUNCEMENT
+  DISCOVERY
+  EVENT
+  SUPPORT
+}
+
+model Category {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  name       String       @unique
+  creatorId  String
+  createdAt  DateTime @default(now())
+
+}
+
+model Event {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  location    String
+  description String
+  startDate   DateTime
+  endDate     DateTime
+  startTime   String
+  img         String?
+  video       String?
+  userEmail   String
+  createdAt DateTime @default(now())
 }

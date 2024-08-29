@@ -1,5 +1,4 @@
 import DashboardFirst from '@/components/DashboardFirst'
-import ResearchPaper from '@/components/ResearchPaper'
 import { prisma } from '@/lib/prisma'
 import React from 'react'
 
@@ -15,7 +14,7 @@ export default async function page() {
       },
       
     }),
-    prisma.research.count({
+    prisma.research.findMany({
      where:{
       status:"PENDING"
      }   

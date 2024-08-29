@@ -9,50 +9,117 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Building, Plus, Trash2, UserPlus, Users } from "lucide-react"
 import { motion } from "framer-motion"
+import axios from "axios"
+import useSWR from "swr"
+import { Prisma } from "@prisma/client"
+import { deleteDepartment, deleteRole } from "@/lib/actions"
+import { toast } from "./ui/use-toast"
+import { LoadingState } from "./LoadingState"
+
+export type Department = Prisma.DepartmentGetPayload<{
+  include:{
+    role:true
+  }
+}>;
+
+
+const fetcher = async (url:string) => {
+  const res = await axios.get(url);
+
+  return res.data;
+};
 
 export default function DepartmentFirst() {
-  const [departments, setDepartments] = useState([
-    { id: 1, name: "Human Resources", roles: ["HR Manager", "Recruiter", "HR Assistant"] },
-    { id: 2, name: "Information Technology", roles: ["IT Director", "System Administrator", "Software Developer"] },
-    { id: 3, name: "Marketing", roles: ["Marketing Manager", "Content Creator", "SEO Specialist"] },
-  ])
-  const [newDepartment, setNewDepartment] = useState("")
+  const [newDepartment, setNewDepartment] = useState<string>()
   const [newRole, setNewRole] = useState("")
-  const [selectedDepartment, setSelectedDepartment] = useState<any>(null)
+  const [isAdding, setisAdding] = useState(false)
+  const [selectedDepartment, setSelectedDepartment] = useState<string>()
+  const [status, setStatus] = useState<string>()
 
-  const handleAddDepartment = () => {
-    if (newDepartment.trim() !== "") {
-      setDepartments([...departments, { id: Date.now(), name: newDepartment, roles: [] }])
-      setNewDepartment("")
-    }
+  const { data, mutate, isLoading, error } = useSWR(
+    `/api/department`,
+    fetcher
+  );
+
+  if(isLoading){
+    <LoadingState />
   }
 
-  const handleAddRole = () => {
-    if (selectedDepartment && newRole.trim() !== "") {
-      const updatedDepartments = departments.map(dept =>
-        dept.id === selectedDepartment.id
-          ? { ...dept, roles: [...dept.roles, newRole] }
-          : dept
-      )
-      setDepartments(updatedDepartments)
-      setNewRole("")
+  const departments = Array.isArray(data as Department[]) ? data as Department[] : [];
+
+
+  const handleAddDepartment = async() => {
+
+    setisAdding(true)
+
+    try {
+      await axios.post('/api/department',{
+        name:newDepartment
+      })
+      mutate()
+    } catch (error) {
+      
+      
+    } finally{
+      setisAdding(false)
     }
+    
   }
 
-  const handleRemoveDepartment = (id:number) => {
-    setDepartments(departments.filter(dept => dept.id !== id))
-    if (selectedDepartment && selectedDepartment.id === id) {
-      setSelectedDepartment(null)
+  const handleAddRole = async () => {
+
+    setisAdding(true)
+
+    try {
+      await axios.post(`/api/department/${selectedDepartment}`,{
+        name:newRole
+      })
+      mutate()
+    } catch (error) {
+      
+      
+    } finally{
+      setisAdding(false)
     }
+    
+    
   }
 
-  const handleRemoveRole = (deptId:number, role:string) => {
-    const updatedDepartments = departments.map(dept =>
-      dept.id === deptId
-        ? { ...dept, roles: dept.roles.filter(r => r !== role) }
-        : dept
-    )
-    setDepartments(updatedDepartments)
+  const handleRemoveDepartment = async (id:string) => {
+    try {
+      const message = await deleteDepartment(id)
+      setStatus(message)
+      mutate()
+    } catch (error) {
+
+      console.log(error)
+      
+    }finally{
+      toast({
+        title:"status",
+        description:status
+      })
+    }
+    
+  }
+
+  const handleRemoveRole = async (deptId:string, roleId:string) => {
+
+    try {
+      const message = await deleteRole(deptId, roleId)
+      setStatus(message)
+      mutate()
+    } catch (error) {
+
+      console.log(error)
+      
+    }finally{
+      toast({
+        title:"status",
+        description:status
+      })
+    }
+   
   }
 
   return (
@@ -85,7 +152,7 @@ export default function DepartmentFirst() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button onClick={handleAddDepartment} className="w-full bg-purple-600 hover:bg-purple-700">
+            <Button onClick={handleAddDepartment} className="w-full bg-purple-600 hover:bg-purple-700" disabled={isAdding}>
               <Plus className="mr-2 h-4 w-4" /> Add Department
             </Button>
           </CardFooter>
@@ -106,8 +173,8 @@ export default function DepartmentFirst() {
                 <select
                   id="department-select"
                   className="w-full p-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  onChange={(e) => setSelectedDepartment(departments.find(d => d.id === parseInt(e.target.value)))}
-                  value={selectedDepartment ? selectedDepartment.id : ""}
+                  onChange={(e) => setSelectedDepartment(e.target.value)}
+                  value={selectedDepartment ? selectedDepartment : ""}
                 >
                   <option value="">Select a department</option>
                   {departments.map((dept) => (
@@ -129,7 +196,7 @@ export default function DepartmentFirst() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button onClick={handleAddRole} className="w-full bg-indigo-600 hover:bg-indigo-700" disabled={!selectedDepartment}>
+            <Button onClick={handleAddRole} className="w-full bg-indigo-600 hover:bg-indigo-700" disabled={!selectedDepartment || isAdding}>
               <Plus className="mr-2 h-4 w-4" /> Add Role
             </Button>
           </CardFooter>
@@ -166,11 +233,11 @@ export default function DepartmentFirst() {
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {dept.roles.map((role, index) => (
+                  {dept.role.map((role, index) => (
                     <Badge key={index} variant="secondary" className="px-2 py-1 text-sm flex items-center gap-1">
-                      {role}
+                      {role.name}
                       <button
-                        onClick={() => handleRemoveRole(dept.id, role)}
+                        onClick={() => handleRemoveRole(dept.id, role.id)}
                         className="ml-1 text-red-500 hover:text-red-700"
                       >
                         <Trash2 className="h-3 w-3" />

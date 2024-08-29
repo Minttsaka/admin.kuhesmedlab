@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Switch } from "@/components/ui/switch"
 import { ChevronRight, ChevronLeft, Home, FileText,Building, Users, BarChart2, Book, Calendar, Settings, HelpCircle, LogOut, LucideProps } from 'lucide-react'
+import { signOut, useSession } from 'next-auth/react'
+import { User } from '@prisma/client'
 
 
 
@@ -14,6 +16,9 @@ export default function GlobalSideBar() {
   
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light')
   const [collapsed, setCollapsed] = React.useState(false)
+
+  const {data:session }= useSession()
+  const user = session?.user as User
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light')
@@ -25,7 +30,7 @@ export default function GlobalSideBar() {
     return(
     
     <Link href={href} passHref>
-      <Button variant="ghost" className={`w-full font-normal justify-start ${collapsed ? 'px-2' : 'px-4'}`}>
+      <Button variant="ghost" className={`w-full font-normal justify-start text-gray-600 ${collapsed ? 'px-2' : 'px-4'}`}>
         <Icon className={`h-5 w-5 ${collapsed ? 'mr-0' : 'mr-2'}`} />
         {!collapsed && <span>{children}</span>}
       </Button>
@@ -95,8 +100,8 @@ export default function GlobalSideBar() {
               </Avatar>
               {!collapsed && (
                 <div className="flex flex-col items-start">
-                  <span className="text-sm font-medium">John Doe</span>
-                  <span className="text-xs text-muted-foreground">Admin</span>
+                  <span className="text-sm font-medium">{user?.name}</span>
+                  <span className="text-xs text-muted-foreground">{user?.role ?? "Admin"}</span>
                 </div>
               )}
             </Button>
@@ -104,7 +109,7 @@ export default function GlobalSideBar() {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={()=>signOut()}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>

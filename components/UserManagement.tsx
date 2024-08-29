@@ -36,59 +36,12 @@ import { Prisma, Research, User } from '@prisma/client'
 
 
 
-interface UserWithPublishedResearch {
-  users:Array<User & { 
-    research: Array<Research>;
-  }>;
-}
-
-interface SingleUser {
-  user:User & { 
-    research: Array<Research>;
-  };
-}
-
-
-
-const users = [
-  {
-    id: 1,
-    name: "Dr. Emily Johnson",
-    email: "emily.johnson@kuhesmedlab.com",
-    role: "Researcher",
-    department: "Oncology",
-    papers: 12,
-    avatar: "/placeholder.svg?height=40&width=40",
+export type UserWithPublishedResearch = Prisma.UserGetPayload<{
+  include: {
+    research: true,
+    departments:true
   },
-  {
-    id: 2,
-    name: "Prof. Michael Chen",
-    email: "michael.chen@kuhesmedlab.com",
-    role: "Reviewer",
-    department: "Cardiology",
-    papers: 8,
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  {
-    id: 3,
-    name: "Dr. Sarah Lee",
-    email: "sarah.lee@kuhesmedlab.com",
-    role: "Admin",
-    department: "Research Operations",
-    papers: 5,
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  {
-    id: 4,
-    name: "Dr. David Brown",
-    email: "david.brown@kuhesmedlab.com",
-    role: "Researcher",
-    department: "Neurology",
-    papers: 15,
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  // Add more users as needed
-]
+}>;
 
 const roleColors : Record<'researcher' | 'Reviewer' | 'Admin', string> = {
   researcher: "bg-blue-500",
@@ -96,7 +49,7 @@ const roleColors : Record<'researcher' | 'Reviewer' | 'Admin', string> = {
   Admin: "bg-purple-500",
 }
 
-export default function UserManagement({users}:{users:UserWithPublishedResearch["users"] }) {
+export default function UserManagement({users}:{users:UserWithPublishedResearch[] }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [roleFilter, setRoleFilter] = useState("All")
   const [selectedUser, setSelectedUser] = useState<User & { research: Array<Research>} | null>()
@@ -177,7 +130,7 @@ export default function UserManagement({users}:{users:UserWithPublishedResearch[
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Badge className={`${roleColors[user.role as 'researcher' | 'Reviewer' | 'Admin']} text-white`}>{user.role}</Badge>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{user.department}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{user.departments?.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{user.research.length}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <DropdownMenu>
@@ -239,7 +192,7 @@ export default function UserManagement({users}:{users:UserWithPublishedResearch[
               </div>
               <div>
                 <Label>Department</Label>
-                <p className="mt-1">{selectedUser?.department}</p>
+                <p className="mt-1">{selectedUser?.authority}</p>
               </div>
               <div>
                 <Label>Papers Published</Label>

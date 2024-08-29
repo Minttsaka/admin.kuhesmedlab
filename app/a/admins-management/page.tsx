@@ -8,18 +8,22 @@ export default async function page() {
 
     where:{
       role:{
-        not:'researcher'
-      }
+        not:"RESEARCHER"
+      },
     },
     include: {
-      research: true
+      research: true,
+      departments:{
+        include:{
+          role:true
+        }
+      }
     },
   })
 
-  console.log(admins)
   return (
     <div>
-        <ManagementFirst admins={admins} />
+        <ManagementFirst admins={admins!} />
     </div>
   )
 }

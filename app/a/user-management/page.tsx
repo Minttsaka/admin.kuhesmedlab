@@ -8,13 +8,14 @@ export default async function page() {
   const user = await prisma.user.findMany({
 
     include: {
-      research: true
+      research: true,
+      departments:true
     },
   })
 
   return (
     <div>
-        <UserManagement users={user} />
+        <UserManagement users={user!} />
     </div>
   )
 }

@@ -11,19 +11,10 @@ export async function POST(req: NextRequest) {
   const sessionUser= session.user as User
   try {
     const data  = await req.json();
-
-    const { name } = data
-
-    const user = await prisma.user.findUnique({
-      where:{
-      id:sessionUser.id
-      }
-    })
-
-    await prisma.department.create({
+    await prisma.event.create({
       data:{
-        name,
-        createdBy:user?.name!
+       ...data,
+       userEmail:sessionUser.email
       }
     })
       ;
@@ -39,13 +30,13 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
-    const department = await prisma.department.findMany({
-      include:{
-        role:true
+    const events = await prisma.event.findMany({
+      orderBy:{
+        createdAt:"desc"
       }
     });
     return NextResponse.json(
-      department
+      events
     );
   } catch (error: any) {
     console.log(error)

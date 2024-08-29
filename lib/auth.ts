@@ -42,6 +42,8 @@ export const authOptions: AuthOptions = {
         });
    
         if (!user) throw new Error("The email does not exist");
+
+        if (user.role!=="ADMIN") throw new Error("Your are not authorized to this dashboard");
     
         if (!credentials?.password) throw new Error("Please Provide Your Password");
         const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);

@@ -142,7 +142,7 @@ export default function SigninForm() {
           </div>
           <div className="w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 transform origin-left scale-x-0 transition-transform duration-500 ease-out login-progress"></div>
         </form>
-       
+        {loginSuccess && <LoadingState />}
       </div>
     </div>
   )

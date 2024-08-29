@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Research, Review, User } from '@prisma/client'
+import Link from 'next/link'
 
 interface ResearchSchema {
   recentResearch: Array<Research & { user: User }>;
@@ -75,7 +76,7 @@ export default function DashboardFirst({
   highReview
 }:{
     published:number, 
-    pending:number, 
+    pending:Research[], 
     activeSurvey:number, 
     collaborations:number,
     recentResearch: ResearchSchema['recentResearch'],
@@ -105,7 +106,7 @@ export default function DashboardFirst({
                 <ClipboardList className="h-4 w-4" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{pending}</div>
+                <div className="text-2xl font-bold">{pending.length}</div>
                 <p className="text-xs opacity-75">5 awaiting review</p>
               </CardContent>
             </Card>
@@ -241,10 +242,18 @@ export default function DashboardFirst({
           <div className="mt-6">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Quick Actions</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Button className="w-full bg-indigo-600 hover:bg-indigo-700">Submit New Paper</Button>
+             <Link href={`/a/research-papers/${pending.length > 0 ? pending[0].id : ""}`}>
+              <Button className="w-full bg-indigo-600 hover:bg-indigo-700">Manage Research Papers</Button>
+             </Link>
+             <Link href={`kuhesmedlab.vercel.app/mw/research`}>
               <Button className="w-full bg-pink-600 hover:bg-pink-700">Create Survey</Button>
-              <Button className="w-full bg-emerald-600 hover:bg-emerald-700">Manage Collaborators</Button>
-              <Button className="w-full bg-amber-600 hover:bg-amber-700">Apply for Funding</Button>
+             </Link>
+             <Link href={`/a/events`}>
+              <Button className="w-full bg-green-600 hover:bg-green-500">Schedule</Button>
+             </Link>
+             <Link href={`/a/content/create}`}>
+              <Button className="w-full bg-purple-600 hover:bg-purple-500">Create Blog</Button>
+             </Link>
             </div>
           </div>
         </div>
@@ -254,13 +263,9 @@ export default function DashboardFirst({
           <div className="container mx-auto px-6">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                © 2023 KUHESMedLab. All rights reserved.
+                © 2024 KUHESMedLab. All rights reserved.
               </div>
-              <div className="flex mt-4 md:mt-0">
-                <a href="#" className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-500 mr-4">Privacy Policy</a>
-                <a href="#" className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-500 mr-4">Terms of Service</a>
-                <a href="#" className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-500">Contact Us</a>
-              </div>
+              
             </div>
           </div>
         </footer>

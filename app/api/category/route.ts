@@ -7,24 +7,19 @@ import { NextResponse, NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
 
-  const session:any = await getServerSession(authOptions);
+    const session:any = await getServerSession(authOptions);
   const sessionUser= session.user as User
+
   try {
     const data  = await req.json();
 
-    const { name } = data
+    const {name} = data
 
-    const user = await prisma.user.findUnique({
-      where:{
-      id:sessionUser.id
-      }
-    })
-
-    await prisma.department.create({
-      data:{
-        name,
-        createdBy:user?.name!
-      }
+    await prisma.category.create({
+     data:{
+      name,
+     creatorId:sessionUser.id
+     }
     })
       ;
 
@@ -39,13 +34,9 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
-    const department = await prisma.department.findMany({
-      include:{
-        role:true
-      }
-    });
+    const categories = await prisma.category.findMany();
     return NextResponse.json(
-      department
+      categories
     );
   } catch (error: any) {
     console.log(error)

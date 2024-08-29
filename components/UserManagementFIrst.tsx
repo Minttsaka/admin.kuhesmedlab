@@ -43,53 +43,17 @@ interface UserWithPublishedResearch {
   }>;
 }
 
-interface SingleUser {
-  user:User & { 
-    research: Array<Research>;
-  };
-}
 
-
-
-const users = [
-  {
-    id: 1,
-    name: "Dr. Emily Johnson",
-    email: "emily.johnson@kuhesmedlab.com",
-    role: "Researcher",
-    department: "Oncology",
-    papers: 12,
-    avatar: "/placeholder.svg?height=40&width=40",
+export type UserType = Prisma.UserGetPayload<{
+  include: {
+    research: true,
+    departments:{
+      include:{
+        role:true
+      }
+    }
   },
-  {
-    id: 2,
-    name: "Prof. Michael Chen",
-    email: "michael.chen@kuhesmedlab.com",
-    role: "Reviewer",
-    department: "Cardiology",
-    papers: 8,
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  {
-    id: 3,
-    name: "Dr. Sarah Lee",
-    email: "sarah.lee@kuhesmedlab.com",
-    role: "Admin",
-    department: "Research Operations",
-    papers: 5,
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  {
-    id: 4,
-    name: "Dr. David Brown",
-    email: "david.brown@kuhesmedlab.com",
-    role: "Researcher",
-    department: "Neurology",
-    papers: 15,
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  // Add more users as needed
-]
+}>;
 
 const roleColors : Record<'researcher' | 'Reviewer' | 'Admin', string> = {
   researcher: "bg-blue-500",
@@ -97,10 +61,10 @@ const roleColors : Record<'researcher' | 'Reviewer' | 'Admin', string> = {
   Admin: "bg-purple-500",
 }
 
-export default function ManagementFirst({admins}:{admins:UserWithPublishedResearch["admins"] }) {
+export default function ManagementFirst({admins}:{admins:UserType[] }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [roleFilter, setRoleFilter] = useState("All")
-  const [selectedUser, setSelectedUser] = useState<User & { research: Array<Research>} | null>()
+  const [selectedUser, setSelectedUser] = useState<UserType | null>()
   const [isAddUserOpen, setIsAddUserOpen] = useState(false)
 
   console.log(typeof(admins))
@@ -112,7 +76,7 @@ export default function ManagementFirst({admins}:{admins:UserWithPublishedResear
   )
 
   const handleRoleChange = (userId:string , newRole:string) => {
-    // Implement role change logic here
+   
     console.log(`Changed role of user ${userId} to ${newRole}`)
   }
 
@@ -180,7 +144,7 @@ export default function ManagementFirst({admins}:{admins:UserWithPublishedResear
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Badge className={`${roleColors[user.role as 'researcher' | 'Reviewer' | 'Admin']} text-white`}>{user.role}</Badge>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{user.department}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{user.departments?.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{user.research.length}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <DropdownMenu>
@@ -193,10 +157,6 @@ export default function ManagementFirst({admins}:{admins:UserWithPublishedResear
                       <DropdownMenuItem onSelect={() => setSelectedUser(user)}>
                         <FileText className="mr-2 h-4 w-4" />
                         <span>View Profile</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Edit className="mr-2 h-4 w-4" />
-                        <span>Edit User</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem>
@@ -242,7 +202,7 @@ export default function ManagementFirst({admins}:{admins:UserWithPublishedResear
               </div>
               <div>
                 <Label>Department</Label>
-                <p className="mt-1">{selectedUser?.department}</p>
+                <p className="mt-1">{selectedUser?.departments?.name!}</p>
               </div>
               <div>
                 <Label>Papers Published</Label>
@@ -250,13 +210,9 @@ export default function ManagementFirst({admins}:{admins:UserWithPublishedResear
               </div>
             </div>
             <div>
-              <Label>Recent Activity</Label>
-              <ul className="mt-2 space-y-2">
-                <li className="text-sm">Submitted a new paper: AI in Medical Imaging</li>
-                <li className="text-sm">Reviewed 3 papers this month</li>
-                <li className="text-sm">Updated profile information</li>
-              </ul>
-            </div>
+                <Label>Authority</Label>
+                <p className="mt-1">{selectedUser?.authority}</p>
+              </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSelectedUser(null)}>Close</Button>
