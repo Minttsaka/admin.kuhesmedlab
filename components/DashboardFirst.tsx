@@ -16,28 +16,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Research, Review, User } from '@prisma/client'
+import { Event, Prisma, Research, Review, User } from '@prisma/client'
 import Link from 'next/link'
 
 interface ResearchSchema {
   recentResearch: Array<Research & { user: User }>;
 }
 
-interface HighReviewSchema {
-  highReview: Array<Research & { 
-    review: Array<Review>;
-  }>;
-}
-
-
-const paperData = [
-  { name: 'Jan', papers: 4 },
-  { name: 'Feb', papers: 3 },
-  { name: 'Mar', papers: 2 },
-  { name: 'Apr', papers: 5 },
-  { name: 'May', papers: 7 },
-  { name: 'Jun', papers: 6 },
-]
+type HighCitationsSchema = Prisma.ResearchGetPayload<{
+  include: {
+    citationTrend: true,
+  }
+}>
 
 const trendingData = [
   { name: 'W1', value: 40 },
@@ -48,39 +38,34 @@ const trendingData = [
   { name: 'W6', value: 65 },
 ]
 
-const recentPapers = [
-  { title: "AI in Medical Diagnosis", author: "Dr. John Smith", avatar: "/placeholder.svg?height=32&width=32" },
-  { title: "Nanotechnology in Drug Delivery", author: "Dr. Emily Johnson", avatar: "/placeholder.svg?height=32&width=32" },
-  { title: "Gene Therapy Advancements", author: "Dr. Michael Brown", avatar: "/placeholder.svg?height=32&width=32" },
-  { title: "Telemedicine Impact on Rural Healthcare", author: "Dr. Sarah Lee", avatar: "/placeholder.svg?height=32&width=32" },
-]
-
 const upcomingEvents = [
   { date: "July 15", event: "Research Symposium" },
   { date: "July 22", event: "Grant Proposal Deadline" },
   { date: "August 5", event: "Peer Review Workshop" },
 ]
 
-const fundingOpportunities = [
-  { name: "NIH Research Grant", deadline: "August 31, 2023", amount: "$500,000" },
-  { name: "Cancer Research Fund", deadline: "September 15, 2023", amount: "$250,000" },
-  { name: "Medical Technology Innovation Grant", deadline: "October 1, 2023", amount: "$750,000" },
-]
 
 export default function DashboardFirst({
   published, 
   pending, 
+  events,
   activeSurvey, 
-  collaborations,
+  user,
   recentResearch,
-  highReview
+  highCitations,
+  paperData
 }:{
     published:number, 
     pending:Research[], 
     activeSurvey:number, 
-    collaborations:number,
+    user:number,
+    events:Event[]
     recentResearch: ResearchSchema['recentResearch'],
-    highReview: HighReviewSchema['highReview']
+    highCitations: HighCitationsSchema[],
+    paperData: {
+      name: string;
+      papers: number;
+  }[]
   }) {
   return (
       <main className=" ">
@@ -97,7 +82,7 @@ export default function DashboardFirst({
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{published}</div>
-                <p className="text-xs opacity-75">+20% from last month</p>
+                <p className="text-xs opacity-75">Now</p>
               </CardContent>
             </Card>
             <Card className="bg-gradient-to-br from-pink-500 to-rose-600 text-white">
@@ -107,7 +92,7 @@ export default function DashboardFirst({
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{pending.length}</div>
-                <p className="text-xs opacity-75">5 awaiting review</p>
+                <p className="text-xs opacity-75">Now</p>
               </CardContent>
             </Card>
             <Card className="bg-gradient-to-br from-orange-500 to-amber-600 text-white">
@@ -117,17 +102,17 @@ export default function DashboardFirst({
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{activeSurvey}</div>
-                <p className="text-xs opacity-75">3 closing this week</p>
+                <p className="text-xs opacity-75">Now</p>
               </CardContent>
             </Card>
             <Card className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Collaborators</CardTitle>
+                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
                 <Users className="h-4 w-4" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{collaborations}</div>
-                <p className="text-xs opacity-75">+12 this month</p>
+                <div className="text-2xl font-bold">{user}</div>
+                <p className="text-xs opacity-75">Now</p>
               </CardContent>
             </Card>
           </div>
@@ -176,7 +161,7 @@ export default function DashboardFirst({
               </CardHeader>
               <CardContent>
                   {recentResearch.map((paper, index) => (
-                    <div key={index} className="flex items-center space-x-4">
+                    <Link href={`/a/research-papers/${paper.id}`} key={index} className="flex items-center space-x-4">
                       <Avatar>
                         <AvatarImage src={paper.user.image!} alt={paper.user.name} />
                         <AvatarFallback>{paper.user.name}</AvatarFallback>
@@ -185,7 +170,7 @@ export default function DashboardFirst({
                         <p className="text-sm font-medium">{paper.title}</p>
                         <p className="text-xs text-gray-500">{paper.user.name}</p>
                       </div>
-                    </div>
+                    </Link>
                   ))}
               </CardContent>
             </Card>
@@ -195,12 +180,12 @@ export default function DashboardFirst({
               </CardHeader>
               <CardContent>
                 <ul className="space-y-4">
-                  {upcomingEvents.map((event, index) => (
+                  {events.map((event, index) => (
                     <li key={index} className="flex items-center space-x-4">
                       <Calendar className="h-5 w-5 text-indigo-500" />
                       <div>
-                        <p className="text-sm font-medium">{event.event}</p>
-                        <p className="text-xs text-gray-500">{event.date}</p>
+                        <p className="text-sm font-medium">{event.title}</p>
+                        <p className="text-xs text-gray-500">{event.createdAt.toDateString()}</p>
                       </div>
                     </li>
                   ))}
@@ -212,7 +197,7 @@ export default function DashboardFirst({
           {/* Funding Opportunities */}
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Research With High Reviews</CardTitle>
+              <CardTitle>Research With Citations</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
@@ -220,15 +205,19 @@ export default function DashboardFirst({
                   <thead>
                     <tr className="text-left border-b">
                       <th className="pb-2">Title</th>
-                      <th className="pb-2">NO. of Review</th>
+                      <th className="pb-2">NO. of Citations</th>
                       <th className="pb-2">CreatedAt</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {highReview.map((research, index) => (
+                    {highCitations.map((research, index) => (
                       <tr key={index} className="border-b last:border-b-0">
-                        <td className="py-2">{research.title}</td>
-                        <td className="py-2">{research.review.length}</td>
+                        <td className="py-2">
+                            <Link href={`/a/research-papers/${research.id}`}>
+                            {research.title}
+                            </Link>
+                          </td>
+                        <td className="py-2">{research.citationTrend.length}</td>
                         <td className="py-2">{research.createdAt.toDateString()}</td>
                       </tr>
                     ))}
@@ -245,13 +234,13 @@ export default function DashboardFirst({
              <Link href={`/a/research-papers/${pending.length > 0 ? pending[0].id : ""}`}>
               <Button className="w-full bg-indigo-600 hover:bg-indigo-700">Manage Research Papers</Button>
              </Link>
-             <Link href={`kuhesmedlab.vercel.app/mw/research`}>
+             <Link href={`https://kuhesmedlab.vercel.app/mw/research`}>
               <Button className="w-full bg-pink-600 hover:bg-pink-700">Create Survey</Button>
              </Link>
              <Link href={`/a/events`}>
               <Button className="w-full bg-green-600 hover:bg-green-500">Schedule</Button>
              </Link>
-             <Link href={`/a/content/create}`}>
+             <Link href={`/a/content/create`}>
               <Button className="w-full bg-purple-600 hover:bg-purple-500">Create Blog</Button>
              </Link>
             </div>

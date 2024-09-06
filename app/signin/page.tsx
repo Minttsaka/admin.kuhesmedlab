@@ -7,7 +7,10 @@
 
 
 
+import { LoadingState } from "@/components/LoadingState";
 import SigninForm from "@/components/SigninForm";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
 
 /** Add fonts into your Next.js project:
 
@@ -24,9 +27,15 @@ To read more about using these font, please visit the Next.js documentation:
 **/
 export default async function page() {
 
+  const SigninForm = dynamic(() => import('@/components/SigninForm'), {
+    ssr: false,
+  })
+
   return (
  
+    <Suspense fallback={<LoadingState />}>
       <SigninForm />
+      </Suspense>
          
   )
 }

@@ -72,6 +72,12 @@ model User {
   departments  Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   authority       String?
   research Research[]
+  Post      Post[]
+  comment   Comment[]
+  likes       Like[]
+  reply   Reply[]
+  collaborator  Collaborator[]
+  choices     SurveyFormAnswer[]
   notifications  Notification[]
   accounts      Account[]
   sessions      Session[]
@@ -88,7 +94,7 @@ enum ResearchStatus {
 model Research {
   id          String        @id @default(auto()) @map("_id") @db.ObjectId
   title       String
-  image       String?
+  views       Int @default(0)
   creatorId   String
   keyWords    String
   field       String
@@ -103,11 +109,13 @@ model Research {
   tag           Tag[]
   volume        String?
   issue         String?
-  downloadCount Int       @default(0)
-  citationCount Int       @default(0)
+  citationTrend CitationTrend[]
+  downloadTrend DownloadTrend[]
   updatedAt     DateTime    @updatedAt
   creatorName String
   affiliation String
+  subjectAreas   ResearchSubjectArea[]
+  impactMetrics  ResearchImpactMetric[]
   review      Review[]
   surveys     Survey[]
   authors     String
@@ -119,12 +127,47 @@ model Research {
   createdAt   DateTime   @default(now())
 }
 
+model ResearchSubjectArea {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  value       Int  
+  researchId  String
+  research    Research @relation(fields: [researchId], references: [id], onDelete: Cascade)
+}
+
+model ResearchImpactMetric {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  subject      String    // e.g., "Citations", "Downloads", "Social Media"
+  value        Int
+  fullMark     Int       // The maximum value for comparison (e.g., full mark out of 150)
+  researchId   String
+  research     Research  @relation(fields: [researchId], references: [id], onDelete: Cascade)
+}
+
+model CitationTrend {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  month       String    
+  year        Int 
+  citations   Int
+  researchId  String
+  research    Research  @relation(fields: [researchId], references: [id], onDelete: Cascade)
+}
+
+model DownloadTrend {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  month       String    
+  year        Int
+  downloads   Int
+  researchId  String
+  research    Research  @relation(fields: [researchId], references: [id], onDelete: Cascade)
+}
+
+
 model Collaborator {
   id            String              @id @default(auto()) @map("_id") @db.ObjectId
-  firstName     String
-  lastName      String
-  email         String            @unique
-  affiliation   String
+  userId        String              
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  affiliation   String              
   role          CollaboratorRole
   researchId    String
   research    Research        @relation(fields: [researchId], references: [id], onDelete: Cascade)
@@ -165,8 +208,8 @@ model File {
   mimetype     String?    // MIME type of the file (e.g., application/pdf)
   fileType     String
   researchId   String
-  contentId    String
-  content      Content    @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  contentId    String?
+  content      Content?    @relation(fields: [contentId], references: [id], onDelete: Cascade)
   research     Research  @relation(fields: [researchId], references: [id], onDelete: Cascade)
   uploadedById String
   uploadedBy   User      @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
@@ -195,6 +238,7 @@ model Survey {
   status      SurveyStatus  @default(draft)
   creatorId   String?
   creatorName String
+  aiAnalyze   String?
   surveyForm  SurveyForm[]
   researchId  String
   research     Research    @relation(fields: [researchId], references: [id], onDelete: Cascade)
@@ -249,8 +293,12 @@ model Option {
 model SurveyFormAnswer {
   id         String      @id @default(auto()) @map("_id") @db.ObjectId
   answer     String
-  userId     String
+  userId     String?
+  startTime    DateTime
+  endTime       DateTime
+  timeTaken     Float
   questionId String
+  user        User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
   question   SurveyFormQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
 }
@@ -336,6 +384,8 @@ model Content {
   creatorImage   String?
   creatorRole   String
   category      String
+  likes         Like[]
+  comment       Comment[]
   files         File[]
   slug        String   @unique
   body        String
@@ -372,5 +422,65 @@ model Event {
   img         String?
   video       String?
   userEmail   String
+  createdAt DateTime @default(now())
+}
+
+model Post {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  body        String
+  slug        String  @unique
+  img         String?
+  video       String?
+  tag         String
+  pdf         String?
+  userId      String
+  likes       Like[]
+  comment     Comment[]
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt  DateTime?
+}
+
+model Comment {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  comment     String
+  img         String?
+  userId      String
+  likes       Like[]
+  postId      String?
+  contentId   String?
+  content     Content?  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  reply       Reply[]
+  post        Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt  DateTime?
+}
+
+model Reply {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  reply     String
+  userId      String
+  likes       Like[]
+  commentId   String
+  comment     Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt  DateTime?
+}
+
+model Like {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  commentId String?
+  replyId   String?
+  contentId  String?
+  content   Content?      @relation(fields: [contentId], references: [id])
+  postId    String?
+  reply     Reply ?       @relation(fields: [replyId], references: [id])
+  comment    Comment?   @relation(fields: [commentId], references: [id])
+  post    Post?   @relation(fields: [postId], references: [id])
+  userId   String
+  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 }

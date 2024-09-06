@@ -376,6 +376,46 @@ export const publishContent = async(id:string)=>{
 
 }
 
+export const getResearchTrends = async (researchId: string) => {
+  const citationTrends = await prisma.citationTrend.findMany({
+    where: { researchId },
+    orderBy: [
+      { year: 'desc' },
+      { month: 'desc' }
+    ]
+  });
+
+  const downloadTrends = await prisma.downloadTrend.findMany({
+    where: { researchId },
+     orderBy: [
+      { year: 'desc' },
+      { month: 'desc' }
+    ]
+  });
+
+  const research = await prisma.research.findUnique({
+    where: { id: researchId },
+    select: {
+      citationTrend: true,
+      downloadTrend: true,
+    },
+  });
+
+  if (!research) {
+    throw new Error("Research not found");
+  }
+
+
+  return { 
+    citationTrends, 
+    downloadTrends ,
+    citations: research.citationTrend.reduce((sum, citation) => sum + citation.citations, 0),
+    downloads: research.downloadTrend.reduce((sum, download) => sum + download.downloads, 0), 
+  };
+}
+
+
+
 
 
 

@@ -4,13 +4,11 @@ import React from 'react'
 
 export default async function page() {
 
-  const [ published, pending, activeSurvey, collaborations, recentPapers, highReview] = await prisma.$transaction([
+  const [ published, pending, activeSurvey, users, recentPapers, highCitations, events] = await prisma.$transaction([
 
     prisma.research.count({
       where:{
-        publicationDate:{
-          not: null,
-        }
+        status:"APPROVED"
       },
       
     }),
@@ -25,13 +23,7 @@ export default async function page() {
           status:"active"
         }
     }),
-    prisma.research.count({
-      where: {
-        collaborator: {
-          some: {},
-        },
-      }
-    }),
+    prisma.user.count(),
     prisma.research.findMany({
       orderBy:{
         createdAt:"desc"
@@ -43,25 +35,67 @@ export default async function page() {
     }),
     prisma.research.findMany({
       include: {
-        review: true,
+        citationTrend: true,
       },
       orderBy: {
-        review: {
+        citationTrend: {
           _count: 'desc',
         },
       },
       take: 5,
+    }),
+    prisma.event.findMany({
+      orderBy:{
+        createdAt:"desc"
+      },
+      take:3
     })
   ])
+
+
+ const getPaperDataByMonth = async (year: number) => {
+  const paperData = await prisma.research.groupBy({
+    by: ["createdAt"],
+    _count: {
+      _all: true,
+    },
+    where: {
+      createdAt: {
+        gte: new Date(year, 0, 1), 
+        lt: new Date(year + 1, 0, 1), 
+      },
+    },
+  });
+
+
+  const monthlyPaperData = Array(12).fill(0).map((_, index) => ({
+    name: new Date(0, index).toLocaleString("default", { month: "short" }),
+    papers: 0,
+  }));
+
+  paperData.forEach(({ createdAt, _count }) => {
+    const monthIndex = new Date(createdAt).getMonth();
+    monthlyPaperData[monthIndex].papers += _count._all;
+  });
+
+  return monthlyPaperData;
+};
+
+const currentYear = new Date().getFullYear();
+const paperData = await getPaperDataByMonth(currentYear);
+
+
   return (
     <div>
       <DashboardFirst 
+      events={events}
       published={published!} 
       pending={pending!} 
       activeSurvey={activeSurvey!} 
-      collaborations={collaborations!}
+      user={users!}
       recentResearch={recentPapers!}
-      highReview={highReview}
+      highCitations={highCitations!}
+      paperData={paperData!}
        />
     </div>
   )

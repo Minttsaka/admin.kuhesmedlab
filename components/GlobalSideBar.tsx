@@ -64,8 +64,8 @@ export default function GlobalSideBar() {
             </h2>
             <div className="space-y-1">
               <NavItem icon={Book} href="/a/research-papers">Research Library</NavItem>
-              <NavItem icon={Book} href="/a/surveys">Survey</NavItem>
-              <NavItem icon={Users} href="/participants">Participants</NavItem>
+              <NavItem icon={Book} href="/a/survey">Survey</NavItem>
+              <NavItem icon={Users} href="#">Feedback</NavItem>
             </div>
           </div>
           <div className="px-3 py-2">
@@ -73,9 +73,9 @@ export default function GlobalSideBar() {
               {!collapsed && "Management"}
             </h2>
             <div className="space-y-1">
-              <NavItem icon={Calendar} href="/events">Schedule</NavItem>
-              <NavItem icon={Users} href="/team">Team</NavItem>
-              <NavItem icon={Settings} href="/settings">Settings</NavItem>
+              <NavItem icon={Calendar} href="/a/events">Schedule</NavItem>
+              <NavItem icon={Users} href="/a/admin-management">Team</NavItem>
+              <NavItem icon={Settings} href="#">Settings</NavItem>
               <NavItem icon={Building} href="/a/institutions">Institution</NavItem>
             </div>
           </div>
@@ -84,7 +84,7 @@ export default function GlobalSideBar() {
               {!collapsed && "Support"}
             </h2>
             <div className="space-y-1">
-              <NavItem icon={HelpCircle} href="/help">Help Center</NavItem>
+              <NavItem icon={HelpCircle} href="#">Help Center</NavItem>
             </div>
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function GlobalSideBar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="w-full justify-start">
               <Avatar className="h-8 w-8 mr-2">
-                <AvatarImage src="/placeholder.svg?height=32&width=32" alt="@johndoe" />
+                <AvatarImage src={user?.image!} alt="@johndoe" className='object-cover' />
                 <AvatarFallback>JD</AvatarFallback>
               </Avatar>
               {!collapsed && (
@@ -107,8 +107,11 @@ export default function GlobalSideBar() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link target='__blank' href={`https://kuhesmedlab.vercel.app/mw/profile`}>
+              Profile
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={()=>signOut()}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>

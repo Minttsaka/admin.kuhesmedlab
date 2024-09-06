@@ -41,54 +41,24 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
-type Survey = {
-  id: number;
-  title: string;
-  researchPaper: string;
-  status: "Active" | "Inactive" | "Archived" |"Draft"; // Assuming status can have limited string values
-  questions: number;
-  responses: number;
-  createdDate: string; // Assuming `created` is a Date object
-};
+import { Prisma } from '@prisma/client'
+import Link from 'next/link'
 
-const surveys: Survey[] = [
-  {
-    id: 1,
-    title: "Patient Satisfaction in Telemedicine",
-    researchPaper: "The Impact of Telemedicine on Rural Healthcare Outcomes",
-    status: "Active",
-    questions: 15,
-    responses: 89,
-    createdDate: "2023-06-15",
+
+type SurveyForm = Prisma.SurveyFormGetPayload<{
+  include:{
+    survey:{
+      include:{
+        research:true
+      }
+    },
+    questions:{
+      include:{
+        choices:true
+      }
+    }
   },
-  {
-    id: 2,
-    title: "COVID-19 Vaccine Efficacy Follow-up",
-    researchPaper: "Long-term Efficacy of mRNA Vaccines",
-    status: "Draft",
-    questions: 20,
-    responses: 0,
-    createdDate: "2023-06-20",
-  },
-  {
-    id: 3,
-    title: "Mental Health in Healthcare Workers",
-    researchPaper: "Burnout Syndrome in Frontline Medical Staff",
-    status: "Archived",
-    questions: 25,
-    responses: 150,
-    createdDate: "2023-05-10",
-  },
-  {
-    id: 4,
-    title: "Nutrition and Chronic Disease Management",
-    researchPaper: "Dietary Interventions in Type 2 Diabetes",
-    status: "Active",
-    questions: 18,
-    responses: 72,
-    createdDate: "2023-06-01",
-  },
-]
+}>
 
 const statusColors = {
   Active: "bg-green-500",
@@ -96,19 +66,19 @@ const statusColors = {
   Archived: "bg-gray-500",
 }
 
-export default function SurveyFirst() {
+export default function SurveyFirst({surveys}:{surveys:SurveyForm[]}) {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("All")
-  const [selectedSurvey, setSelectedSurvey] = useState<Survey>()
+  const [selectedSurvey, setSelectedSurvey] = useState<SurveyForm | null>()
   const [isCreateSurveyOpen, setIsCreateSurveyOpen] = useState(false)
 
   const filteredSurveys = surveys.filter(survey => 
     (survey.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     survey.researchPaper.toLowerCase().includes(searchTerm.toLowerCase())) &&
+     survey.description.toLowerCase().includes(searchTerm.toLowerCase())) &&
     (statusFilter === "All" || survey.status === statusFilter)
   )
 
-  const handleStatusChange = (surveyId:number, newStatus:any) => {
+  const handleStatusChange = (surveyId:string, newStatus:any) => {
     // Implement status change logic here
     console.log(`Changed status of survey ${surveyId} to ${newStatus}`)
   }
@@ -117,9 +87,6 @@ export default function SurveyFirst() {
     <div className=" p-6 bg-gray-100 dark:bg-gray-900 min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Survey Management</h1>
-        <Button onClick={() => setIsCreateSurveyOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Create New Survey
-        </Button>
       </div>
       
       <div className="mb-6 flex flex-col sm:flex-row gap-4">
@@ -151,43 +118,22 @@ export default function SurveyFirst() {
           <Card key={survey.id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <CardTitle>{survey.title}</CardTitle>
-              <CardDescription>{survey.researchPaper}</CardDescription>
+              <CardDescription>{survey.description}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex justify-between items-center mb-4">
                 <Badge className={`${statusColors[survey.status as keyof typeof statusColors]} text-white`}>{survey.status}</Badge>
-                <span className="text-sm text-gray-500 dark:text-gray-400">Created: {survey.createdDate}</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">Created: {survey.createdAt.toDateString()}</span>
               </div>
               <div className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
-                <span>{survey.questions} questions</span>
-                <span>{survey.responses} responses</span>
+                <span>{survey.questions.length} questions</span>
+                <span>{survey.questions.map(question=>question.choices).length} responses</span>
               </div>
             </CardContent>
             <CardFooter className="flex justify-between">
               <Button variant="outline" size="sm" onClick={() => setSelectedSurvey(survey)}>
                 View Details
               </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
-                    <Edit className="mr-2 h-4 w-4" />
-                    <span>Edit Survey</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => handleStatusChange(survey.id, "Active")}>
-                    <Play className="mr-2 h-4 w-4" />
-                    <span>Activate</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => handleStatusChange(survey.id, "Archived")}>
-                    <Archive className="mr-2 h-4 w-4" />
-                    <span>Archive</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </CardFooter>
           </Card>
         ))}
@@ -209,87 +155,32 @@ export default function SurveyFirst() {
               </div>
               <div>
                 <Label>Created Date</Label>
-                <p className="mt-1">{selectedSurvey?.createdDate}</p>
+                <p className="mt-1">{selectedSurvey?.createdAt.toDateString()}</p>
               </div>
               <div>
                 <Label>Questions</Label>
-                <p className="mt-1">{selectedSurvey?.questions}</p>
+                <p className="mt-1">{selectedSurvey?.questions.length}</p>
               </div>
               <div>
                 <Label>Responses</Label>
-                <p className="mt-1">{selectedSurvey?.responses}</p>
+                <p className="mt-1">{selectedSurvey?.questions.map(question=>question.choices).length}</p>
               </div>
             </div>
             <div>
               <Label>Research Paper</Label>
-              <p className="mt-1">{selectedSurvey?.researchPaper}</p>
+              <p className="mt-1">{selectedSurvey?.survey.research.title}</p>
             </div>
             <div>
-              <Label>Survey Questions</Label>
-              <ul className="mt-2 space-y-2 list-disc list-inside">
-                <li>How satisfied were you with the telemedicine service?</li>
-                <li>Did you experience any technical difficulties during the consultation?</li>
-                <li>How would you rate the quality of care received via telemedicine?</li>
-                {/* Add more example questions */}
-              </ul>
+              <h3 className='font-semibold'>Description</h3>
+              <p className='text-sm'>{selectedSurvey?.description}</p>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" >Close</Button>
-            <Button>Edit Survey</Button>
+            <Button variant="outline" onClick={()=>setSelectedSurvey(null)}>Close</Button>
+            <Button>
+              <Link href={``}>View Survey</Link>
+            </Button>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isCreateSurveyOpen} onOpenChange={setIsCreateSurveyOpen}>
-        <DialogContent className="sm:max-w-[625px]">
-          <DialogHeader>
-            <DialogTitle>Create New Survey</DialogTitle>
-            <DialogDescription>
-              Enter the details of the new survey to create it in the system.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={(e) => {
-            e.preventDefault()
-            // Implement create survey logic here
-            setIsCreateSurveyOpen(false)
-          }}>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="title" className="text-right">
-                  Title
-                </Label>
-                <Input id="title" className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="researchPaper" className="text-right">
-                  Research Paper
-                </Label>
-                <Input id="researchPaper" className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="description" className="text-right">
-                  Description
-                </Label>
-                <Textarea id="description" className="col-span-3" />
-              </div>
-              <div>
-                <Label>Questions</Label>
-                <div className="mt-2 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Input placeholder="Enter a question" />
-                    <Button size="sm" variant="outline">
-                      <PlusCircle className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  {/* You can add more question inputs dynamically */}
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit">Create Survey</Button>
-            </DialogFooter>
-          </form>
         </DialogContent>
       </Dialog>
     </div>

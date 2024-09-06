@@ -1,12 +1,12 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts'
-import { SunIcon, MoonIcon, TrendingUpIcon, DownloadIcon, UsersIcon, GlobeIcon, ArrowRight, FormInput } from 'lucide-react'
+import { SunIcon, MoonIcon, TrendingUpIcon, DownloadIcon, UsersIcon, GlobeIcon, ArrowRight, FormInput, View } from 'lucide-react'
 import { Progress } from './ui/progress'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
@@ -36,42 +36,68 @@ import { cn } from '@/lib/utils'
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import  { PureComponent } from 'react';
-import {  Collaborator, SurveyForm } from '@prisma/client'
+import {  Collaborator, Prisma, Research, SurveyForm } from '@prisma/client'
+import { useToast } from './ui/use-toast'
+import { getResearchTrends } from '@/lib/actions'
 
 
+export type ResearchWithAllRelations = Prisma.ResearchGetPayload<{
+  include:{
+    citationTrend:true,
+    downloadTrend:true,
+    reference:true,
+    files:true,
+    collaborator:{
+      include:{
+        user:true
+      }
+    },
+    surveys:{
+      include:{
+        surveyForm:{
+          include:{
+            questions:{
+              include:{
+                choices:true
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}>;
 
-type Survey = {
-  id: string;
-  title: string;
-  description: string;
-  creatorId: string | null;
-  creatorName: string;
-  researchId: string;
-  label:string;
-  surveyForm :SurveyForm[]
-  createdAt: Date;
+function StatusBadge({ status }:{ status:string }) {
+  const colors = {
+    active: 'bg-green-100 text-green-800',
+    draft: 'bg-yellow-100 text-yellow-800',
+    archived: 'bg-gray-100 text-gray-800'
+  }
+
+  const selectedColor = colors[status as keyof typeof colors];
+
+  return (
+    <span className={`px-2 py-1 rounded-full text-xs font-medium ${selectedColor}`}>
+      {status.charAt(0).toUpperCase() + status.slice(1)}
+    </span>
+  )
 }
-const FormSchema = z.object({
-  title: z
-    .string()
-    .min(2, "First name must be at least 2 characters")
-    .max(45, "First name must be less than 45 characters"),
-  description: z.string()
-  .min(2, "First name must be at least 2 characters"),
-  label: z.string()
-  .min(2, "First name must be at least 2 characters")
-});
 
-type InputType = z.infer<typeof FormSchema>;
+function ImportanceDot({ importance }:{ importance:string }) {
+  const colors = {
+    high: 'bg-red-500',
+    medium: 'bg-yellow-500',
+    low: 'bg-green-500'
+  }
 
-// Enhanced mock data
-const researchPapers = [
-  { id: 1, title: "Quantum Entanglement in Neural Networks", author: "Dr. Alice Johnson", year: 2023, citations: 89, downloads: 3420, impact: 9.2 },
-  { id: 2, title: "Bioremediation Techniques for Plastic Pollution", author: "Prof. Bob Smith", year: 2022, citations: 132, downloads: 5150, impact: 8.7 },
-  { id: 3, title: "AI-Driven Personalized Medicine", author: "Dr. Carol Williams", year: 2023, citations: 76, downloads: 2980, impact: 8.9 },
-  { id: 4, title: "Fusion Energy: Breakthrough in Plasma Confinement", author: "Dr. David Brown", year: 2021, citations: 204, downloads: 7630, impact: 9.5 },
-  { id: 5, title: "Neuroplasticity in Adult Learning", author: "Prof. Eve Davis", year: 2022, citations: 118, downloads: 4270, impact: 8.4 },
-]
+  const selectedColor = colors[importance as keyof typeof colors];
+
+  return (
+    <span className={`w-2 h-2 rounded-full ${selectedColor}`} />
+  )
+}
+
 
 const generateTimeSeriesData = (months:number, baseValue:number, trend:number, volatility:number) => {
   return Array.from({ length: months }, (_, i) => {
@@ -81,16 +107,23 @@ const generateTimeSeriesData = (months:number, baseValue:number, trend:number, v
   })
 }
 
-const generateChartData = (paper:any) => {
-  const citationData = generateTimeSeriesData(24, 10, 4, 10).map((value, index) => ({
-    month: `Month ${index + 1}`,
-    citations: value
-  }))
+const generateChartData = async(paper:Research) => {
+  const { 
+    citationTrends,
+    downloadTrends,
+    citations,
+    downloads 
+  } = await getResearchTrends(paper.id);
 
-  const downloadData = generateTimeSeriesData(24, 100, 15, 50).map((value, index) => ({
-    month: `Month ${index + 1}`,
-    downloads: value
-  }))
+  const citationData = citationTrends.map(trend => ({
+    month: `${trend.month} ${trend.year}`,
+    citations: trend.citations
+  }));
+
+  const downloadData = downloadTrends.map(trend => ({
+    month: `${trend.month} ${trend.year}`,
+    downloads: trend.downloads
+  }));
 
   const subjectAreaData = [
     { name: 'Computer Science', value: Math.random() * 400 + 100 },
@@ -101,78 +134,76 @@ const generateChartData = (paper:any) => {
   ]
 
   const impactMetrics = [
-    { subject: 'Citations', A: paper.citations, fullMark: 150 },
-    { subject: 'Downloads', A: paper.downloads / 50, fullMark: 150 },
-    { subject: 'Social Media', A: Math.random() * 100 + 50, fullMark: 150 },
-    { subject: 'News Mentions', A: Math.random() * 50 + 10, fullMark: 150 },
-    { subject: 'Policy Citations', A: Math.random() * 30 + 5, fullMark: 150 },
-  ]
+    { subject: 'Citations', A: citations, fullMark: 150 },
+    { subject: 'Downloads', A: downloads / 50, fullMark: 150 }, // Adjust scale as needed
+  ];
 
+  
   return { citationData, downloadData, subjectAreaData, impactMetrics }
 }
 
 const COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FF`A07A', '#98D8C8']
 
+type Metrics = {
+  citationData: {
+    month: string;
+    citations: number;
+}[],
+   downloadData: {
+    month: string;
+    downloads: number;
+}[], 
+   subjectAreaData: {
+    name: string;
+    value: number;
+}[], 
+   impactMetrics:{
+    subject: string;
+    A: number;
+    fullMark: number;
+} []
+}
+
 export default function Practice(
   { 
-    researchId, 
-    surveys,
-    downloads,
-    citations,
-    title,
-    abstract,
-    collaborators
+    research, 
+ 
   }:{
-    researchId:string,
-    surveys:Survey[],
-    downloads:number,
-    citations:number,
-    title:string,
-    abstract:string
-    collaborators:Collaborator[]
+    research:ResearchWithAllRelations,
+
   }) {
-  const [selectedPaper, setSelectedPaper] = useState(researchPapers[0])
+    
   const [darkMode, setDarkMode] = useState(false)
-  const { citationData, downloadData, subjectAreaData, impactMetrics } = generateChartData(selectedPaper)
+  const [metrics, setMetrics] = useState<Metrics>()
 
-  const router = useRouter();
-  const {
-    register,
-    handleSubmit,
-    reset,
-    control,
-    watch,
-    formState: { errors,isSubmitting },
-  } = useForm<InputType>({
-    resolver: zodResolver(FormSchema),
-  });
-
-
-
-  const saveSurvey: SubmitHandler<InputType> = async (data) => {
-
-      const {title, description, label} = data
-    try {
-      const response= await axios.post('/api/survey',{
-        title,
-        description,
-        researchId,
-        label
-      })
-      router.push(`/mw/survey/questionner/${response.data}/${researchId}`)
-      
-        toast.success("The workspace created.");
-        
-    } catch (error) {
-      console.log(error)
+  useEffect(()=>{
+    const getMetric = async()=>{
+      // const { citationData, downloadData, subjectAreaData, impactMetrics }
+      const data  = await generateChartData(research)
+    setMetrics(data)
     }
-  };
+    getMetric()
+  },[])
+
+  const inputVariants = {
+    focus: { scale: 1.02, transition: { type: 'spring', stiffness: 300 } },
+    blur: { scale: 1 }
+  }
+
+  const collaborators = research?.collaborator.map(collaborator=>collaborator.user)
+
+  const totalCitations = research?.citationTrend?.reduce((sum, citation) => sum + citation.citations, 0);
+
+  // Calculate total downloads
+  const totalDownloads = research?.downloadTrend?.reduce((sum, download) => sum + download.downloads, 0);
+
+  console.log(totalCitations, totalDownloads)
 
   return (
     <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
       <div className="p-4 bg-gradient-to-r from-background to-secondary ">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-4xl bg-clip-text font-extrabold tracking-tight mb-2 text-transparent bg-gradient-to-r from-primary to-secondary line-clamp-1">{title}</h1>
+          <h1 className="text-4xl bg-clip-text font-extrabold tracking-tight mb-2 text-transparent bg-gradient-to-r from-primary to-secondary line-clamp-1">{research?.title}</h1>
           <div className="flex items-center space-x-2">
             <SunIcon className="h-5 w-5" />
             <Switch checked={darkMode} onCheckedChange={setDarkMode} />
@@ -180,71 +211,82 @@ export default function Practice(
           </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <Card className="lg:col-span-1 bg-gradient-to-br from-card to-background">
+          <Card className="lg:col-span-1 bg-white">
             <CardHeader>
               <CardTitle className='text-md flex items-center justify-between'>
-                Survey conducted
+                Survey         
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[80vh]">
+              <ScrollArea className="md:h-full w-full">
                 <AnimatePresence>
-                  {surveys?.map((survey) => (
-                    <motion.div
-                      key={survey.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3 }}
-                      className={`p-4 mb-4 rounded-lg cursor-pointer transition-all duration-300 bg-primary text-primary-foreground shadow-lg '
-                      }`}
-                    
-                    >
-                      <h3 className="font-semibold">{survey.title}</h3>
-                      <p className="text-sm">{survey.description}</p>
-                      <div className="flex justify-between mt-2">
-                        <Badge variant="secondary" className="flex items-center">
-                          <FormInput className="w-3 h-3 mr-1" />
-                          {survey.surveyForm.length} - {survey.surveyForm.length === 1 ? "form" :"forms "}
-                        </Badge>
-                        <Badge variant="secondary" className="flex items-center ">
-                          {survey.label} 
-                        </Badge>
-                        <Link  href={`/mw/survey/questionner/${survey.id}/${researchId}`} target='_blank' >
-                          <Badge variant="secondary" className="flex items-center">
-                            <ArrowRight className="w-3 h-3 mr-1" />
-                            View
-                          </Badge>
-                        </Link>
-                      </div>
-                    </motion.div>
-                  ))}
+                  {research?.surveys.map((survey) => survey.surveyForm.map(questionnaire=>(
+                     <motion.div
+                     key={questionnaire.id}
+                     layout
+                     initial={{ opacity: 0, scale: 0.9 }}
+                     animate={{ opacity: 1, scale: 1 }}
+                     exit={{ opacity: 0, scale: 0.9 }}
+                     transition={{ duration: 0.3 }}
+                     className="bg-gray-100 my-1 rounded-xl shadow-lg overflow-hidden flex-shrink-0 w-80"
+                   >
+                     <div className="p-6">
+                       <div className="flex justify-between items-start mb-4">
+                         <h2 className="text-xl font-semibold text-gray-800">{questionnaire.title}</h2>
+                         <StatusBadge status={questionnaire.status} />
+                       </div>
+                       <div className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
+                         <ImportanceDot importance={questionnaire.importance} />
+                         <span>{questionnaire.importance} importance</span>
+                       </div>
+                       <div className="text-3xl font-bold text-blue-600 mb-4">
+                         {questionnaire.questions.map(question=>question.choices).length}
+                         <span className="text-sm font-normal text-gray-600 ml-2">Respondents</span>
+                       </div>
+                       <div className="flex justify-between items-center">
+                         <div className="space-x-2">
+                         <Link target='__blank' href={`/mw/survey/create/${questionnaire.id}`}>
+                           <Button variant="outline" size="sm">
+                             <View size={16} className="mr-1" />
+                             View
+                           </Button>
+                           </Link>                           
+                         </div>
+                       </div>
+                     </div>
+                   </motion.div>
+                  ))
+                   
+                  )}
                 </AnimatePresence>
               </ScrollArea>
             </CardContent>
           </Card>
           <div className="lg:col-span-3 space-y-6">
             <Card className="bg-gradient-to-br from-card to-background">
+              <CardHeader>
+                <CardTitle className='line-clamp-1'>{research?.abstract}</CardTitle>
+              </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="flex flex-col items-center justify-center p-4 bg-primary/10 rounded-lg">
                     <TrendingUpIcon className="w-8 h-8 mb-2 text-primary" />
-                    <span className="text-2xl font-bold">{citations}</span>
+                    <span className="text-2xl font-bold">{totalCitations}</span>
                     <span className="text-sm">Total Citations</span>
                   </div>
                   <div className="flex flex-col items-center justify-center p-4 bg-primary/10 rounded-lg">
                     <DownloadIcon className="w-8 h-8 mb-2 text-primary" />
-                    <span className="text-2xl font-bold">{downloads}</span>
+                    <span className="text-2xl font-bold">{totalDownloads}</span>
                     <span className="text-sm">Total Downloads</span>
                   </div>
                   <div className="flex flex-col items-center justify-center p-4 bg-primary/10 rounded-lg">
                     <UsersIcon className="w-8 h-8 mb-2 text-primary" />
-                    <span className="text-2xl font-bold">{collaborators?.length}</span>
+                    <span className="text-2xl font-bold">{research?.collaborator.length}</span>
                     <span className="text-sm">Collaborators</span>
                   </div>
                   <div className="flex flex-col items-center justify-center p-4 bg-primary/10 rounded-lg">
                     <GlobeIcon className="w-8 h-8 mb-2 text-muted-foreground" />
-                    <span className="text-2xl font-bold">{selectedPaper.impact.toFixed(1)}</span>
+                    <span className="text-2xl font-bold">{research?.issue}</span>
                     <span className="text-sm">Impact Factor</span>
                   </div>
                 </div>
@@ -257,7 +299,7 @@ export default function Practice(
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={citationData}>
+                    <LineChart data={metrics?.citationData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />
@@ -274,7 +316,7 @@ export default function Practice(
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={downloadData}>
+                    <BarChart data={metrics?.downloadData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />
@@ -293,7 +335,7 @@ export default function Practice(
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie
-                        data={subjectAreaData}
+                        data={metrics?.subjectAreaData}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
@@ -302,7 +344,7 @@ export default function Practice(
                         dataKey="value"
                         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                       >
-                        {subjectAreaData.map((entry, index) => (
+                        {metrics?.subjectAreaData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
@@ -317,7 +359,7 @@ export default function Practice(
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={impactMetrics}>
+                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={metrics?.impactMetrics}>
                       <PolarGrid />
                       <PolarAngleAxis dataKey="subject" />
                       <PolarRadiusAxis angle={30} domain={[0, 150]} />

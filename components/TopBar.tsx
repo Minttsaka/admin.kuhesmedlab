@@ -8,9 +8,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import Notifications from './Notifications'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 
 export default function TopBar() {
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light')
+
+  const {data:session} = useSession()
+
+  const user = session?.user
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light')
@@ -70,19 +75,13 @@ export default function TopBar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg?height=32&width=32" alt="@johndoe" />
+                    <AvatarImage src={user?.image!} alt="@johndoe" className='object-cover'/>
                     <AvatarFallback>JD</AvatarFallback>
                   </Avatar>
                   <span className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-background"></span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <Link href={'/a/profile'}>
-                    Profile
-                  </Link>
-                  </DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
                 <DropdownMenuItem>Log out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

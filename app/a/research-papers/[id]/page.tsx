@@ -20,8 +20,15 @@ export default async function page({params:{id}}:{params:{id:string}}) {
         id
       },
       include:{
-        tag:true,
-        review:true,
+        citationTrend:true,
+        downloadTrend:true,
+        files:true,
+        reference:true,
+        collaborator:{
+          include:{
+            user:true
+          }
+        },
         surveys:{
           include:{
             surveyForm:{
@@ -34,12 +41,7 @@ export default async function page({params:{id}}:{params:{id:string}}) {
               }
             }
           }
-        },
-        files:true,
-        user:true,
-        institution:true,
-        collaborator:true,
-        reference:true
+        }
       }
     })
 

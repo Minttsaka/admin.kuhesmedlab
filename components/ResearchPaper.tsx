@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Prisma, Research } from '@prisma/client'
+import Link from 'next/link'
 
 
 const statusColors = {
@@ -149,15 +150,7 @@ export default function ResearchPaper({research}:{research:Research[]}) {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onSelect={() => setSelectedPaper(paper)}>
                             <Eye className="mr-2 h-4 w-4" />
-                            <span>View Details</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Edit className="mr-2 h-4 w-4" />
-                            <span>Edit</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Download className="mr-2 h-4 w-4" />
-                            <span>Download</span>
+                            <Link href={`/a/research-papers/${paper.id}`}>View Details</Link>
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           {
@@ -228,7 +221,7 @@ export default function ResearchPaper({research}:{research:Research[]}) {
                     <Button variant="outline" size="sm" onClick={() => setSelectedPaper(paper)}>
                       View Details
                     </Button>
-                    <DropdownMenu>
+                    {/* <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm">
                           <MoreHorizontal className="h-4 w-4" />
@@ -253,7 +246,7 @@ export default function ResearchPaper({research}:{research:Research[]}) {
                           <span>Disapprove</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
-                    </DropdownMenu>
+                    </DropdownMenu> */}
                   </div>
                 </CardContent>
               </Card>
