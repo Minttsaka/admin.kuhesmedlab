@@ -414,8 +414,60 @@ export const getResearchTrends = async (researchId: string) => {
   };
 }
 
+export const createSupport = async(data:any)=>{
 
+  console.log(data)
 
+  try {
+
+    const { slug } = data
+
+    const existSupport = await prisma.support.findUnique({
+      where:{
+        slug
+      }
+    })
+
+    if(existSupport){
+
+      const update = await prisma.support.update({
+        where:{
+          slug
+        }, 
+        data
+      })
+      
+      return existSupport.slug
+
+    } else {
+
+    const newSupport = await prisma.support.create({
+      data
+    })
+
+    console.log(newSupport)
+
+    return newSupport.slug
+  }
+    
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const supportDelete = async(id:string)=>{
+
+  console.log(id)
+  try {
+    await prisma.support.delete({
+      where:{
+        id
+      }
+    })
+  } catch (error) {
+    console.log(error)
+  }
+}
 
 
 

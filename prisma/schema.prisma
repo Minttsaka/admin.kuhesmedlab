@@ -26,9 +26,7 @@ model Account {
   scope              String?
   id_token           String?
   session_state      String?
-
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
 }
 
 model Session {
@@ -68,6 +66,7 @@ model User {
   researchId    String?
   reviews     Review[]
   files       File[]
+  feedbackType Feedback[]
   departmentId  String?
   departments  Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   authority       String?
@@ -94,10 +93,12 @@ enum ResearchStatus {
 model Research {
   id          String        @id @default(auto()) @map("_id") @db.ObjectId
   title       String
+  slug        String    @unique
   views       Int @default(0)
   creatorId   String
   keyWords    String
   field       String
+  citeReference String
   abstract      String?
   Published DateTime?
   publicationDate DateTime?
@@ -144,6 +145,7 @@ model ResearchImpactMetric {
   research     Research  @relation(fields: [researchId], references: [id], onDelete: Cascade)
 }
 
+
 model CitationTrend {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
   month       String    
@@ -161,7 +163,6 @@ model DownloadTrend {
   researchId  String
   research    Research  @relation(fields: [researchId], references: [id], onDelete: Cascade)
 }
-
 
 model Collaborator {
   id            String              @id @default(auto()) @map("_id") @db.ObjectId
@@ -248,6 +249,8 @@ model Survey {
 model SurveyForm {
   id          String        @id @default(auto()) @map("_id") @db.ObjectId
   title       String
+  img         String?
+  estimatedTime Int @default(0)
   description String
   label       String
   status      SurveyStatus @default(draft)
@@ -352,6 +355,26 @@ model Notification {
   readAt        DateTime?
 }
 
+model Feedback {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String?
+  name          String
+  email        String?
+  user         User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating       Int?     
+  comments     String
+  feedbackType FeedbackType
+  createdAt    DateTime @default(now())
+}
+
+enum FeedbackType {
+  GENERAL 
+  SURVEY_ANALYSIS  
+  BUG_REPORT 
+  FEATURE_REQUEST
+  OTHER
+}
+
 enum NotificationStatus {
   UNREAD
   READ
@@ -411,11 +434,18 @@ model Category {
 
 }
 
+enum EventsTypes {
+  ORGANIZATION
+  GENERAL
+  INSTITUTION
+}
+
 model Event {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   location    String
   description String
+  type        EventsTypes
   startDate   DateTime
   endDate     DateTime
   startTime   String
@@ -483,4 +513,22 @@ model Like {
   userId   String
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
+}
+
+model NewsletterSubscription {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  email          String   @unique
+  subscribedAt   DateTime @default(now())
+  isSubscribed   Boolean  @default(true)
+  preferences    Json?    // Optional: Store any preferences for topics, frequency, etc.
+  unsubscribeToken String? // Token to allow for unsubscribing via email
+}
+
+model Support {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  slug      String   @unique
+  body    String?
+  createdAt DateTime @default(now())
+
 }
