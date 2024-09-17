@@ -469,5 +469,85 @@ export const supportDelete = async(id:string)=>{
   }
 }
 
+export async function markAsReads(id:string) {
+
+  console.log(id)
+  try {
+
+    const notifications = await prisma.notification.update({
+      where:{
+        id
+      },
+      data:{
+        status:"READ",
+        readAt:new Date()
+      }
+    })
+
+    console.log("marked as red single")
+
+    if (!notifications) {
+      throw new Error("Form not found");
+    }
+
+    return true
+
+  } catch (error: any) {
+    console.error("Error creating form:", error);
+    return false
+  }
+}
+
+export async function markAllAsReads() {
+
+  const session:any = await getServerSession(authOptions);
+  const userSession= (session.user as User);
+  try {
+
+    const notifications = await prisma.notification.updateMany({
+      where:{
+        receiverId:userSession.id
+      },
+      data:{
+        status:"READ",
+        readAt:new Date()
+      }
+    })
+
+    console.log("marked as red all")
+
+    if (!notifications) {
+      throw new Error("Form not found");
+    }
+
+    return "success"
+
+  } catch (error: any) {
+    console.error("Error creating form:", error);
+    return false
+  }
+}
+
+export async function deleteNotification(id:string) {
+
+  try {
+
+    await prisma.notification.delete({
+      where:{
+        id
+      },
+      
+    })
+
+
+    return "success"
+
+  } catch (error: any) {
+    console.error("Error creating form:", error);
+    return false
+  }
+}
+
+
 
 

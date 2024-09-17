@@ -74,7 +74,7 @@ export default function GlobalSideBar() {
             </h2>
             <div className="space-y-1">
               <NavItem icon={Calendar} href="/a/events">Schedule</NavItem>
-              <NavItem icon={Users} href="/a/admin-management">Team</NavItem>
+              <NavItem icon={Users} href="/a/admins-management">Team</NavItem>
               <NavItem icon={Settings} href="#">Settings</NavItem>
               <NavItem icon={Building} href="/a/institutions">Institution</NavItem>
             </div>
