@@ -45,7 +45,7 @@ export default function Notifications() {
   );
 
 
-  const unreadCount = notificationsData?.filter(n => n.status === "READ").length
+  const unreadCount = notificationsData?.filter(n => n.status ==="UNREAD").length
 
   const filteredNotifications = notificationsData?.filter(notification => {
     const matchesSearch = notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -211,7 +211,7 @@ export default function Notifications() {
                   </ScrollArea>
                 </TabsContent>
 
-                <TabsContent value="feedback" className="flex-grow flex flex-col p-4">
+                <TabsContent value="feedback" className="p-4">
                   <h3 className="text-xl font-semibold mb-4">Feedback</h3>
                   <ScrollArea className="flex-grow mt-4">
                     <div className="space-y-4">
