@@ -27,10 +27,10 @@ const ActivationPage = async ({ params }: Props) => {
           ) : result.data === "alreadyActivated" ? (
             <div>
                <MailIcon className="mx-auto h-12 w-12 text-[green]" />
-              <p className="text-[green] text-2xl">You are already activated.<a className="text-[blue]" href="/signin">login</a></p>
+              <p className="text-[green] text-2xl">You are already activated.<a className="text-[blue]" href="/a/dashboard">login</a></p>
             </div>
             
-          ) : result.data !== "alreadyActivated" && result.data !== "userNotExist" ? ( <div className="w-full h-screen flex items-center justify-center"><Link href="/signin"><Button>Login</Button></Link></div>) 
+          ) : result.data !== "alreadyActivated" && result.data !== "userNotExist" ? ( <div className="w-full h-screen flex items-center justify-center"><Link href="/a/dashboard"><Button>Login</Button></Link></div>) 
           :(<p>Something went wrong</p>)
           }
           </div>
