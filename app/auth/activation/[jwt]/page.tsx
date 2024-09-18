@@ -30,7 +30,7 @@ const ActivationPage = async ({ params }: Props) => {
               <p className="text-[green] text-2xl">You are already activated.<a className="text-[blue]" href="/a/dashboard">login</a></p>
             </div>
             
-          ) : result.data !== "alreadyActivated" && result.data !== "userNotExist" ? ( <div className="w-full h-screen flex items-center justify-center"><Link href="/a/dashboard"><Button>Login</Button></Link></div>) 
+          ) : result.data !== "alreadyActivated" && result.data !== "userNotExist" ? ( <div className="w-full h-screen flex items-center justify-center"><Link href="https://kuhesmedlab.vercel.app/mw/dashboard"><Button>Login</Button></Link></div>) 
           :(<p>Something went wrong</p>)
           }
           </div>

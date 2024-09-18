@@ -62,6 +62,7 @@ export default function SigninForm() {
           description: "Success",
           variant: "default",
         })
+        setLoginSuccess(true)
         router.refresh()
         if(callbackUrl){
           router.push(callbackUrl)
