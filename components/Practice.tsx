@@ -32,16 +32,12 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { PaperPlaneIcon, PlusIcon } from '@radix-ui/react-icons'
 import { cn } from '@/lib/utils'
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import  { PureComponent } from 'react';
 import {  Collaborator, Prisma, Research, SurveyForm } from '@prisma/client'
-import { UploadResearchPaper } from './upload-research-paper'
 import { GroupMembers } from './GroupMembers'
-import ResearchInvite from './ResearchInvite'
-import { useToast } from './ui/use-toast'
 import { getResearchTrends, saveSurveyData } from '@/lib/actions'
 
 
@@ -142,8 +138,6 @@ export default function Practice(
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [metrics, setMetrics] = useState<Metrics>()
 
-  const { toast } = useToast()
-  const router = useRouter();
 
   useEffect(()=>{
     const getMetric = async()=>{
@@ -153,41 +147,6 @@ export default function Practice(
     }
     getMetric()
   },[])
-
-  const handleSubmit = async() => {
-
-    const data={
-      title,
-      description,
-      label,
-      researchId:research.id
-    }
-    try {
-      setIsSubmitting(true)
-
-      const res:any = await saveSurveyData(data)
-
-      if(res==="label"){
-          toast({
-            title:"Status",
-            description:"Change the label"
-          })
-          setIsSubmitting(false)
-        } else {
-          toast({
-            title:"Survey",
-            description:"Successfully created"
-          })
-          router.push(`/mw/survey/questionner/${res.id!}/${research.id}`)
-  
-        }
-      
-    } catch (error) {
-      
-    } finally{
-      setIsSubmitting(false)
-    }
-  }
 
   const inputVariants = {
     focus: { scale: 1.02, transition: { type: 'spring', stiffness: 300 } },
@@ -213,153 +172,12 @@ export default function Practice(
           </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <Card className="lg:col-span-1 bg-gradient-to-br from-card to-background">
-            <CardHeader>
-              <CardTitle className='text-md flex items-center justify-between'>
-                Survey
-                <Dialog>
-                  <DialogTrigger className='absolute top-3 right-3 p-2 rounded-md bg-primary text-primary-foreground shadow-lg ' asChild>
-                    <button className="px-8 py-2 rounded-xl relative bg-gray-100 text-gray-600 text-sm hover:shadow-2xl hover:shadow-white/[0.1] transition duration-200">
-                        <span className="relative text-xs z-20">
-                          Create Survey form
-                        </span>
-                      </button>
-                  </DialogTrigger>
-                  <DialogContent className="bg-gradient-to-br from-slate-800 to-slate-900 shadow-2xl border-none rounded-none  shadow-purple-500 ">
-                    <h2 className='text-gray-600 font-bold space-y-5 text-center'>Create New Survey</h2>
-                    <div className="rounded-xl ">
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="grid gap-6"
-                      >
-                        <motion.div className="space-y-2">
-                          <Label htmlFor="title" className="text-sm font-medium text-slate-200">
-                            Title
-                          </Label>
-                          <motion.div variants={inputVariants} whileFocus="focus" >
-                            <Input
-                              id="title"
-                              value={title}
-                              onChange={(e) => setTitle(e.target.value)}
-                              className="bg-transparent border-b-2 border-blue-500 focus:border-teal-400 text-white placeholder-slate-400 focus:ring-0 focus:outline-none transition-colors duration-300"
-                              placeholder="Enter title"
-                            />
-                          </motion.div>
-                        </motion.div>
-
-                        <motion.div className="space-y-2">
-                          <Label htmlFor="description" className="text-sm font-medium text-slate-200">
-                            Description
-                          </Label>
-                          <motion.div variants={inputVariants} whileFocus="focus" >
-                            <Input
-                              id="description"
-                              value={description}
-                              onChange={(e) => setDescription(e.target.value)}
-                              className="bg-transparent border-b-2 border-blue-500 focus:border-teal-400 text-white placeholder-slate-400 focus:ring-0 focus:outline-none transition-colors duration-300"
-                              placeholder="Enter description"
-                            />
-                          </motion.div>
-                        </motion.div>
-
-                        <motion.div className="space-y-2">
-                          <Label htmlFor="label" className="text-sm font-medium text-slate-200">
-                            Label
-                          </Label>
-                          <motion.div variants={inputVariants} whileFocus="focus" >
-                            <Input
-                              id="label"
-                              value={label}
-                              onChange={(e) => setLabel(e.target.value)}
-                              className="bg-transparent border-b-2 border-blue-500 focus:border-teal-400 text-white placeholder-slate-400 focus:ring-0 focus:outline-none transition-colors duration-300"
-                              placeholder="Enter label"
-                            />
-                          </motion.div>
-                        </motion.div>
-
-                        <motion.button
-                          onClick={handleSubmit}
-                          disabled={isSubmitting}
-                          className="px-8 py-3 rounded-full relative bg-gradient-to-r from-blue-600 to-teal-400 text-white text-sm font-medium hover:shadow-2xl hover:shadow-teal-500/20 transition duration-300 overflow-hidden group"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          <motion.div
-                            className="absolute inset-0 bg-gradient-to-r from-teal-400 to-blue-600"
-                            initial={{ x: '100%' }}
-                            animate={{ x: isSubmitting ? '0%' : '100%' }}
-                            transition={{ duration: 0.5, ease: 'easeInOut' }}
-                          />
-                          <span className="relative z-10 flex items-center justify-center">
-                            {isSubmitting ? (
-                              <>
-                                <Loader2 className="animate-spin mr-2 h-4 w-4" />
-                                Creating...
-                              </>
-                            ) : (
-                              'Create New Survey'
-                            )}
-                          </span>
-                          <motion.div
-                            className="absolute inset-x-0 h-1 bottom-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50"
-                            initial={{ scaleX: 0 }}
-                            animate={{ scaleX: 1 }}
-                            transition={{ duration: 0.5, ease: 'easeInOut' }}
-                          />
-                        </motion.button>
-                      </motion.div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-         
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="md:h-full">
-                <AnimatePresence>
-                  {research?.surveys.map((survey) => (
-                    <motion.div
-                      key={survey.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3 }}
-                      className={`p-4 mb-4 rounded-lg cursor-pointer transition-all duration-300 bg-primary text-primary-foreground shadow-lg '
-                      }`}
-                    
-                    >
-                      <h3 className="font-semibold">{survey.title}</h3>
-                      <p className="text-sm">{survey.description}</p>
-                      <div className="flex justify-between mt-2">
-                        <Badge variant="secondary" className="flex items-center">
-                          <FormInput className="w-3 h-3 mr-1" />
-                          {survey.surveyForm.length} - {survey.surveyForm.length === 1 ? "form" :"forms "}
-                        </Badge>
-                        <Badge variant="secondary" className="flex items-center ">
-                          {survey.label} 
-                        </Badge>
-                        <Link  href={`/mw/survey/questionner/${survey.id}/${research.id}`} target='_blank' >
-                          <Badge variant="secondary" className="flex items-center">
-                            <ArrowRight className="w-3 h-3 mr-1" />
-                            View
-                          </Badge>
-                        </Link>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </ScrollArea>
-            </CardContent>
-          </Card>
           <div className="lg:col-span-3 space-y-6">
             <Card className="bg-gradient-to-br from-card to-background">
               <CardHeader>
                 <CardTitle className='line-clamp-1'>{research.abstract}</CardTitle>
                 <div className='flex items-center gap-3'>
-                <GroupMembers collaborator={collaborators} />
-                <ResearchInvite id={research.id} />
+                  <GroupMembers collaborator={collaborators} />
                 </div>
                
               </CardHeader>

@@ -376,6 +376,67 @@ export const publishContent = async(id:string)=>{
 
 }
 
+export const saveSurveyData = async(data:SurveyData)=>{
+
+  const {title ,description, researchId, label} = data
+
+  const session:any = await getServerSession(authOptions);
+  const sessionUser= session.user as User
+  try {
+
+    const research = await prisma.research.findUnique({
+      where:{
+          id:researchId
+      }
+    });
+
+    const user = await prisma.user.findUnique({
+      where:{
+        id:sessionUser.id
+      }
+    })
+
+  if(!research) throw new Error("You have to loggin in first. This an unauthorized operation")
+
+    const existLabel = await prisma.survey.findFirst({
+      where:{
+        label,
+        creatorId:user?.id
+      }
+    })
+
+    if(existLabel){
+      return "label"
+    }
+
+  const newSurvey = await prisma.survey.create({
+      data:{
+          title,
+          creatorId:user?.id,
+          creatorName:user?.name!,
+          description,
+          label,
+          research: {
+              connect: {
+                id: research.id,
+              },
+          }
+
+      }
+  })
+
+  return newSurvey
+    
+  } catch (error) {
+    if(error){
+    console.log(error)
+    return "failed"
+    }
+    
+  }
+
+}
+
 export const getResearchTrends = async (researchId: string) => {
   const citationTrends = await prisma.citationTrend.findMany({
     where: { researchId },
@@ -398,6 +459,8 @@ export const getResearchTrends = async (researchId: string) => {
     select: {
       citationTrend: true,
       downloadTrend: true,
+      subjectAreas:true,
+      views:true
     },
   });
 
@@ -409,6 +472,8 @@ export const getResearchTrends = async (researchId: string) => {
   return { 
     citationTrends, 
     downloadTrends ,
+    views:research.views,
+    subjectAreaData:research.subjectAreas,
     citations: research.citationTrend.reduce((sum, citation) => sum + citation.citations, 0),
     downloads: research.downloadTrend.reduce((sum, download) => sum + download.downloads, 0), 
   };
