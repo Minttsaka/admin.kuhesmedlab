@@ -1,26 +1,26 @@
+
 "use client"
+
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import React from "react"
-import { Bell, X, Search, CheckCircle2, AlertCircle, InfoIcon, AlertTriangle, Trash2, MoreVertical, BellIcon, CheckCircle, Loader2 } from "lucide-react"
+import { Bell, X, Search, CheckCircle2, AlertCircle, InfoIcon, AlertTriangle, Trash2, MoreVertical, BellIcon, CheckCircle, Loader2, MessageSquare, Star } from "lucide-react"
 import axios from "axios"
-import { Notification, User } from "@prisma/client"
+import { Notification, User, Feedback } from "@prisma/client"
 import { useSession } from "next-auth/react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import useSWR from "swr"
-import { deleteNotification, markAllAsReads, markAsReads } from "@/lib/actions"
+import { deleteNotification, markAllAsReads, markAsReads} from "@/lib/actions"
 
-
-const fetcher = async (url:string) => {
+const fetcher = async (url: string) => {
   const res = await axios.get(url);
-
   return res.data;
 };
-
 
 export default function Notifications() {
   const [isOpen, setIsOpen] = useState(false)
@@ -28,64 +28,58 @@ export default function Notifications() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [filter, setFilter] = useState("all")
+  const [activeTab, setActiveTab] = useState("notifications")
+  const [feedbackMessage, setFeedbackMessage] = useState("")
 
-  const {data:session } = useSession()
-
+  const { data: session } = useSession()
   const user = session?.user as User
 
-  const { data, mutate, isLoading, error } = useSWR<Notification[]>(
+  const { data: notificationsData, mutate, isLoading: isLoadingNotifications, error: notificationsError } = useSWR<Notification[]>(
     `/api/notification`,
     fetcher
   );
 
+  const { data: feedbackData, mutate:feedbackMutate, isLoading: isLoadingfeedback, error: feedbackError } = useSWR<Feedback[]>(
+    `/api/feedback`,
+    fetcher
+  );
 
 
-  const unreadCount =  data?.filter(n => n.status==="READ").length
+  const unreadCount = notificationsData?.filter(n => n.status === "READ").length
 
-  const filteredNotifications = data?.filter(notification => {
+  const filteredNotifications = notificationsData?.filter(notification => {
     const matchesSearch = notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    notification.description.toLowerCase().includes(searchTerm.toLowerCase())
+      notification.description.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesFilter = filter === "all" || (filter === "unread" && !notification.readAt)
     return matchesSearch && matchesFilter
   })
 
-  const markAsRead = async(id:string) => {
-
+  const markAsRead = async (id: string) => {
     try {
-
-        await markAsReads(id)
-        mutate()
-      
+      await markAsReads(id)
+      mutate()
     } catch (error) {
-     
+      console.error("Error marking notification as read:", error)
     }
-
   }
 
-  const dltNotification = async(id:string) => {
-
+  const dltNotification = async (id: string) => {
     try {
-
-        await deleteNotification(id)
-        mutate()
+      await deleteNotification(id)
+      mutate()
     } catch (error) {
-     
+      console.error("Error deleting notification:", error)
     }
-
   }
 
-  const markAllAsRead = async() => {
-
+  const markAllAsRead = async () => {
     try {
-
-        await markAllAsReads()
-        mutate()
+      await markAllAsReads()
+      mutate()
     } catch (error) {
-     
+      console.error("Error marking all notifications as read:", error)
     }
-
   }
-
 
   return (
     <div className="relative">
@@ -109,59 +103,66 @@ export default function Notifications() {
           >
             <div className="h-full flex flex-col">
               <div className="p-4 flex justify-between items-center border-b border-gray-700">
-                <h2 className="text-2xl font-bold">Notifications</h2>
+                <h2 className="text-2xl font-bold">Notifications & Feedback</h2>
                 <Button onClick={() => setIsOpen(false)} variant="ghost" size="icon" className="text-gray-400 hover:text-white">
                   <X className="h-6 w-6" />
                 </Button>
               </div>
 
-              <div className="p-4 space-y-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <Input
-                    type="text"
-                    placeholder="Search notifications..."
-                    className="pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400 w-full"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-                <div className="flex justify-between items-center">
-                  <select
-                    className="bg-gray-800 border-gray-700 text-white rounded-md p-2"
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                  >
-                    <option value="all">All</option>
-                    <option value="unread">Unread</option>
-                  </select>
-                  <Button onClick={markAllAsRead} variant="outline" size="sm" className="text-sm bg-gray-800 hover:bg-gray-800">
-                    Mark all as read
-                  </Button>
-                </div>
-              </div>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                  <TabsTrigger value="feedback">Feedback</TabsTrigger>
+                </TabsList>
 
-              <ScrollArea className="flex-grow">
-                <div className="p-4 space-y-4">
-                  {filteredNotifications?.map((notification) => (
-                    <motion.div
-                      key={notification.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3 }}
-                      className={`relative p-4 rounded-lg ${
-                        notification.readAt ? 'bg-gray-800' : 'bg-gray-750'
-                      } hover:bg-gray-700 cursor-pointer transition-colors duration-200`}
-                      onClick={() => {
-                        setSelectedNotification(notification);
-                        markAsRead(notification.id);
-                        setIsDetailOpen(true);
-                      }}
-                    >
-                      <div className="flex items-start space-x-4">
+                <TabsContent value="notifications" className="flex-grow flex flex-col">
+                  <div className="p-4 space-y-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <Input
+                        type="text"
+                        placeholder="Search notifications..."
+                        className="pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400 w-full"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <select
+                        className="bg-gray-800 border-gray-700 text-white rounded-md p-2"
+                        value={filter}
+                        onChange={(e) => setFilter(e.target.value)}
+                      >
+                        <option value="all">All</option>
+                        <option value="unread">Unread</option>
+                      </select>
+                      <Button onClick={markAllAsRead} variant="outline" size="sm" className="text-sm bg-gray-800 hover:bg-gray-800">
+                        Mark all as read
+                      </Button>
+                    </div>
+                  </div>
+
+                  <ScrollArea className="flex-grow">
+                    <div className="p-4 space-y-4">
+                      {filteredNotifications?.map((notification) => (
+                        <motion.div
+                          key={notification.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3 }}
+                          className={`relative p-4 rounded-lg ${
+                            notification.readAt ? 'bg-gray-800' : 'bg-gray-750'
+                          } hover:bg-gray-700 cursor-pointer transition-colors duration-200`}
+                          onClick={() => {
+                            setSelectedNotification(notification);
+                            markAsRead(notification.id);
+                            setIsDetailOpen(true);
+                          }}
+                        >
+                          <div className="flex items-start space-x-4">
                         <div className={`p-2 rounded-full bg-blue-500 bg-opacity-20`}>
-                          {isLoading && <Loader2 className="animate-spin" /> }
+                          {isLoadingNotifications && <Loader2 className="animate-spin" /> }
                         </div>
                         <div className="flex-grow">
                           <h3 className="font-semibold">{notification.title}</h3>
@@ -204,11 +205,51 @@ export default function Notifications() {
                           Mark as read
                         </Button>
                       </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </ScrollArea>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+
+                <TabsContent value="feedback" className="flex-grow flex flex-col p-4">
+                  <h3 className="text-xl font-semibold mb-4">Feedback</h3>
+                  <ScrollArea className="flex-grow mt-4">
+                    <div className="space-y-4">
+                      {feedbackData?.map((feedback) => (
+                        <div key={feedback.id} className="bg-gray-800 p-4 rounded-lg">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <p className="text-sm font-semibold">{feedback.name}</p>
+                              {feedback.email && (
+                                <p className="text-xs text-gray-400">{feedback.email}</p>
+                              )}
+                            </div>
+                            <Badge 
+                              variant={
+                                feedback.feedbackType ==="BUG_REPORT" ? 'destructive' : 
+                                feedback.feedbackType === 'FEATURE_REQUEST' ? 'default' : 'secondary'
+                              }
+                            >
+                              {feedback.feedbackType.replace('_', ' ')}
+                            </Badge>
+                          </div>
+                          {feedback.rating !== null && (
+                            <div className="mb-2">
+                              <StarRating rating={feedback.rating} />
+                            </div>
+                          )}
+                          <p className="text-sm">{feedback.comments}</p>
+                          <p className="text-xs text-gray-400 mt-2">
+                            {new Date(feedback.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
             </div>
+
             <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
               <DialogContent className="sm:max-w-4xl bg-gradient-to-br from-purple-50 to-pink-50">
                 <DialogHeader>
@@ -254,6 +295,21 @@ export default function Notifications() {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  )
+}
+
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div className="flex">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          className={`w-4 h-4 ${
+            star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
+          }`}
+        />
+      ))}
     </div>
   )
 }

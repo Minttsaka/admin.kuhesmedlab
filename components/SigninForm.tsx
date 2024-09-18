@@ -31,10 +31,6 @@ export default function SigninForm() {
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/'
 
- 
-  const {data:session , status, } =useSession()
-
-
   const {
     register,
     handleSubmit,
@@ -66,11 +62,12 @@ export default function SigninForm() {
           description: "Success",
           variant: "default",
         })
-        setLoginSuccess(true)
-        router.refresh()
-        router.push(callbackUrl)
+        if(callbackUrl){
+          router.push(callbackUrl)
+        } else{
+          router.push('/a/dashboard') 
+        }
       }
-     
   
     } catch (error) {
       if (error instanceof Error) {
