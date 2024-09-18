@@ -69,6 +69,7 @@ export default function SigninForm() {
         setLoginSuccess(true)
         
         router.push(callbackUrl)
+        router.push('/a/dashboard')
       }
      
   
