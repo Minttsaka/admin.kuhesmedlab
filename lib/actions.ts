@@ -376,6 +376,13 @@ export const publishContent = async(id:string)=>{
 
 }
 
+type SurveyData ={
+  title:string ,
+  description:string, 
+  researchId:string, 
+  label:string
+}
+
 export const saveSurveyData = async(data:SurveyData)=>{
 
   const {title ,description, researchId, label} = data
