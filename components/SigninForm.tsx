@@ -67,9 +67,8 @@ export default function SigninForm() {
           variant: "default",
         })
         setLoginSuccess(true)
-        
+        router.refresh()
         router.push(callbackUrl)
-        router.push('/a/dashboard')
       }
      
   
