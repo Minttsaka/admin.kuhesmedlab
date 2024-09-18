@@ -48,7 +48,7 @@ export default function SingleResearch({research}:{research:ResearchWithAllRelat
         />
         <ResearchFiles files={research?.files!} />
         <RelatedResearchList title={research?.title!} />
-        <ResearchReferencesSection reference={research?.reference!} />
+        <ResearchReferencesSection researchId={research?.id!} actualRef={research?.citeReference!} />
         <Approve id={research?.id!} status={research.status!} />
 
       </div>
