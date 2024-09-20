@@ -620,6 +620,26 @@ export async function deleteNotification(id:string) {
   }
 }
 
+export async function changeRole(id:string, data:any) {
+
+  try {
+
+    await prisma.user.update({
+      where:{
+        id
+      },
+      data
+    })
+
+
+    return "success"
+
+  } catch (error: any) {
+    console.error("Error creating form:", error);
+    return false
+  }
+}
+
 
 
 

@@ -160,8 +160,10 @@ export default function ManagementFirst({admins}:{admins:UserType[] }) {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem>
-                        <Shield className="mr-2 h-4 w-4" />
-                        <span>Change Role</span>
+                        <Link href={`/a/profile/${user.id}`} className='flex items-center gap-2'>
+                          <Shield className="mr-2 h-4 w-4" />
+                          <span>Change Role</span>
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem className="text-red-600">
                         <Trash2 className="mr-2 h-4 w-4" />
@@ -198,7 +200,7 @@ export default function ManagementFirst({admins}:{admins:UserType[] }) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Role</Label>
-                <Badge className={`${roleColors[selectedUser?.role as 'researcher' | 'Reviewer' | 'Admin']} text-white mt-1`}>{selectedUser?.role}</Badge>
+                <Badge className={`${roleColors[selectedUser?.role as 'researcher' | 'Reviewer' | 'Admin']} text-white mt-1`}>{selectedUser?.role!}</Badge>
               </div>
               <div>
                 <Label>Department</Label>
