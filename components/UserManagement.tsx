@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Prisma, Research, User } from '@prisma/client'
+import Link from 'next/link'
 
 
 
@@ -144,14 +145,12 @@ export default function UserManagement({users}:{users:UserWithPublishedResearch[
                         <FileText className="mr-2 h-4 w-4" />
                         <span>View Profile</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Edit className="mr-2 h-4 w-4" />
-                        <span>Edit User</span>
-                      </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem>
-                        <Shield className="mr-2 h-4 w-4" />
-                        <span>Change Role</span>
+                        <Link href={`/a/profile/${user.id}`} className='flex items-center gap-2'>
+                          <Shield className="mr-2 h-4 w-4" />
+                          <span>Change Role</span>
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem className="text-red-600">
                         <Trash2 className="mr-2 h-4 w-4" />
