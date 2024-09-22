@@ -36,9 +36,15 @@ export async function GET() {
     try {
         const session:any = await getServerSession(authOptions);
         const sessionUser= session.user as User
+
+        const user = await prisma.user.findUnique({
+          where:{
+            email:sessionUser.email
+          }
+        })
     
         const chats = await prisma.chat.findMany({
-          where: { userId: sessionUser.id },
+          where: { userId: user?.id },
           include: {
             user: {
               select: { id: true, name: true, image: true }
@@ -56,8 +62,8 @@ export async function GET() {
           unreadCount: chat.unreadCount,
         }))
     
-        NextResponse.json(formattedChats)
+        return NextResponse.json(formattedChats)
       } catch (error) {
-        NextResponse.json({ message: 'Error fetching chats', error})
+        return  NextResponse.json({ message: 'Error fetching chats', error})
       }
 }

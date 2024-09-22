@@ -49,7 +49,7 @@ export default function SigninForm() {
       if (!result?.ok) {
         toast({
           title: "error",
-          description: "Something went wrong",
+          description: result?.error,
           variant: "destructive",
         })
         return;

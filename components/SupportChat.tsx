@@ -12,7 +12,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import axios from 'axios'
 import { User } from '@prisma/client'
 
-const fetcher = async(url: string) => {
+const fetcher = async (url: string) => {
     const res = await axios.get(url)
     return res.data
 }
@@ -30,7 +30,7 @@ interface Chat {
   user: {
     id: string
     name: string
-    avatar: string
+    image: string
   }
   lastMessage: string
   unreadCount: number
@@ -48,8 +48,7 @@ const SupportChat = ({user}:{user:User}) => {
 
   const { data: messages,mutate:messageMutate, error: messagesError } = useSWR<ChatMessage[]>(
     `/api/chats/${selectedChat}`,
-    fetcher,
-    { refreshInterval: 1000 }
+    fetcher
   )
 
   useEffect(() => {
@@ -124,6 +123,11 @@ const SupportChat = ({user}:{user:User}) => {
               <p className="p-4 text-destructive">Failed to load chats</p>
             ) : !chats ? (
               <p className="p-4">Loading chats...</p>
+            ) :chats.length==0 ? (
+              <div className='flex justify-center items-center h-full'>
+                <p className="p-4 text-gray-500">No chat</p>
+              </div>
+              
             ) : (
               <ul>
                 {chats.map((chat) => (
@@ -136,7 +140,7 @@ const SupportChat = ({user}:{user:User}) => {
                   >
                     <div className="flex items-center space-x-3">
                       <Avatar>
-                        <AvatarImage src={chat.user.avatar} alt={chat.user.name} />
+                        <AvatarImage src={chat.user.image} alt={chat.user.name} />
                         <AvatarFallback>{chat.user.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
@@ -159,11 +163,11 @@ const SupportChat = ({user}:{user:User}) => {
 
       {/* Individual Chat Popup */}
       {selectedChat && (
-        <div className="fixed bottom-4 right-96 w-96 h-[32rem] bg-background border rounded-lg shadow-lg flex flex-col">
+        <div className="fixed bottom-4 right-96 w-96 h-[32rem] bg-blue-900 rounded-lg shadow-lg flex flex-col">
           <div className="p-4 border-b flex justify-between items-center bg-primary text-primary-foreground">
             <div className="flex items-center space-x-3">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={chats?.find(chat => chat.id === selectedChat)?.user.avatar} alt={chats?.find(chat => chat.id === selectedChat)?.user.name} />
+                <AvatarImage src={chats?.find(chat => chat.id === selectedChat)?.user.image} alt={chats?.find(chat => chat.id === selectedChat)?.user.name} />
                 <AvatarFallback>{chats?.find(chat => chat.id === selectedChat)?.user.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <h3 className="text-lg font-semibold">
@@ -171,30 +175,6 @@ const SupportChat = ({user}:{user:User}) => {
               </h3>
             </div>
             <div className="flex space-x-2">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="text-primary-foreground">
-                      <Phone size={20} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Start voice call</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="text-primary-foreground">
-                      <Video size={20} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Start video call</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
