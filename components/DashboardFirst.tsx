@@ -135,7 +135,7 @@ export default function DashboardFirst({
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Trending Topics</CardTitle>
+                <CardTitle>Research created per each field</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
