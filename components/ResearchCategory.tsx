@@ -166,7 +166,7 @@ export default function Category() {
             </CardHeader>
             <CardContent>
               <div className="flex justify-between items-center mb-4">
-                <Badge className={`bg-[green] text-white`}>{category.category}</Badge>
+                <Badge className={`bg-[green] text-white`}>{category.label}</Badge>
                 <span className="text-sm text-gray-500 dark:text-gray-400">{category.papers.length} papers</span>
               </div>
             </CardContent>

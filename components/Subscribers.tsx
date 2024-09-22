@@ -26,6 +26,7 @@ import {
   PaginationPrevious
 } from "@/components/ui/pagination"
 import { NewsletterSubscription } from '@prisma/client'
+import { Badge } from './ui/badge'
 
 
 
@@ -50,7 +51,7 @@ export default function NewsletterSubscribers({subscribers}:{subscribers:Newslet
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Email</TableHead>
+            <TableHead>Email<Badge className={`bg-[green] text-white w-fit`}>{subscribers.length}</Badge></TableHead>
             <TableHead>Category</TableHead>
             <TableHead>Subscribed On</TableHead>
             <TableHead>Actions</TableHead>
