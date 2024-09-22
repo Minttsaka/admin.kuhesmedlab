@@ -58,6 +58,7 @@ export async function GET() {
         const formattedChats = chats.map(chat => ({
           id: chat.id,
           user: chat.user,
+          topic:chat.topic,
           lastMessage: chat.messages[0]?.content || '',
           unreadCount: chat.unreadCount,
         }))
