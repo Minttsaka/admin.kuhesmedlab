@@ -50,9 +50,9 @@ const SupportChat = ({user}:{user:User}) => {
 
   const { data: messages,mutate:messageMutate, error: messagesError } = useSWR<ChatMessage[]>(
     `/api/chats/${selectedChat}`,
-    fetcher
+    fetcher,
+    { refreshInterval: 1000 }
   )
-
   useEffect(() => {
     if (chats) {
       const count = chats.reduce((total, chat) => total + chat.unreadCount, 0)
