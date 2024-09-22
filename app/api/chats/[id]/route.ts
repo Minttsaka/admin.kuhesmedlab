@@ -86,28 +86,5 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function PUT(req: NextRequest) {
-  try {
-    const url = new URL(req.url);
-    const id = url.pathname.split("/").pop();
-
-    if (!id) {
-      return NextResponse.json({ error: "ID parameter is missing" }, { status: 400 });
-    }
-
-
-    const { chatId } = await req.json()
-
-    await prisma.chat.update({
-      where: { id: chatId },
-      data: { unreadCount: 0 }
-    })
-
-    return NextResponse.json({ message: 'Chat marked as read' })
-  } catch (error: any) {
-    console.error("Error creating form:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
 
 

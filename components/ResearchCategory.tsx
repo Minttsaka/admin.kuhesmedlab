@@ -66,7 +66,8 @@ type Category = Prisma.ResearchCategoryGetPayload<{
 }>
 
 const formSchema = z.object({
-  category: z.string().min(2, "First name must be at least 2 characters"),
+  category: z.string().min(2, "field must be at least 2 characters"),
+  label: z.string().min(2, "field must be at least 2 characters").max(2, "field  label must be at not greater than 2 characters"),
   description: z.string().min(2, "Last name must be at least 2 characters"),
 
 })
@@ -88,6 +89,7 @@ export default function Category() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       category: "",
+      label: "",
       description: "",
     },
   })
@@ -229,6 +231,19 @@ export default function Category() {
                     <FormLabel>name</FormLabel>
                     <FormControl>
                     <Input placeholder="Name of category" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+             <FormField
+                control={form.control}
+                name="label"
+                render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Label</FormLabel>
+                    <FormControl>
+                    <Input placeholder="label of your field with 2 characters. eg F1" {...field} />
                     </FormControl>
                     <FormMessage />
                 </FormItem>

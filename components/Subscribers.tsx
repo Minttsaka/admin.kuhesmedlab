@@ -45,7 +45,7 @@ export default function NewsletterSubscribers({subscribers}:{subscribers:Newslet
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className=" p-4">
       <h1 className="text-2xl font-bold mb-4">Newsletter Subscribers</h1>
       <Table>
         <TableHeader>
@@ -59,6 +59,7 @@ export default function NewsletterSubscribers({subscribers}:{subscribers:Newslet
         <TableBody>
           {currentItems.map((subscriber) => (
             <TableRow key={subscriber.id}>
+              <TableCell>{subscriber.email}</TableCell>
               <TableCell>All</TableCell>
               <TableCell>{subscriber.createdAt.toDateString()}</TableCell>
               <TableCell>

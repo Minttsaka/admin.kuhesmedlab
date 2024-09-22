@@ -88,6 +88,7 @@ model User {
 model ResearchCategory {
   id           String    @id @default(auto()) @map("_id") @db.ObjectId
   category      String   @unique
+  label         String   @unique
   description   String
   papers        Research[]
   createdAt   DateTime   @default(now())

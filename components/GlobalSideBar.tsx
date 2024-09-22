@@ -65,7 +65,7 @@ export default function GlobalSideBar() {
             <div className="space-y-1">
               <NavItem icon={Book} href="/a/research-papers">Research Library</NavItem>
               <NavItem icon={Book} href="/a/survey">Survey</NavItem>
-              <NavItem icon={SortDesc} href="/a/category">Research Categories</NavItem>
+              <NavItem icon={Book} href="/a/category">Research Categories</NavItem>
             </div>
           </div>
           <div className="px-3 py-2">
