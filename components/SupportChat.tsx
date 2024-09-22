@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import axios from 'axios'
 import { User } from '@prisma/client'
+import { changReadCount } from '@/lib/actions'
 
 const fetcher = async (url: string) => {
     const res = await axios.get(url)
@@ -63,6 +64,8 @@ const SupportChat = ({user}:{user:User}) => {
 
   const handleChatSelect = async (chatId: string) => {
     setSelectedChat(chatId)
+    changReadCount(chatId)
+    chatMutate()
     messageMutate()
   }
 
@@ -198,22 +201,22 @@ const SupportChat = ({user}:{user:User}) => {
               <ul className="space-y-4">
                 {messages.map((message) => (
                   <li
-                    key={message.id}
-                    className={`flex ${
-                      message.senderId === 'user-id-1' ? 'justify-end' : 'justify-start'
+                  key={message.id}
+                  className={`flex ${
+                    message.senderId === user.id ? 'justify-end' : 'justify-start'
+                  }`}
+                >
+                  <div
+                    className={`max-w-[70%] p-3 rounded-lg ${
+                      message.senderId === user.id
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-accent'
                     }`}
                   >
-                    <div
-                      className={`max-w-[70%] p-3 rounded-lg ${
-                        message.senderId === 'user-id-1'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-accent'
-                      }`}
-                    >
-                      <p className="text-sm">{message.content}</p>
-                      <span className="text-xs opacity-70 mt-1 block">{message.timestamp}</span>
-                    </div>
-                  </li>
+                    <p className="text-sm">{message.content}</p>
+                    <span className="text-xs opacity-70 mt-1 block">{message.timestamp}</span>
+                  </div>
+                </li>
                 ))}
               </ul>
             )}

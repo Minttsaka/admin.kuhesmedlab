@@ -640,6 +640,24 @@ export async function changeRole(id:string, data:any) {
   }
 }
 
+export async function changReadCount(id:string) {
+
+  try {
+
+    await prisma.chat.update({
+      where: { id },
+      data: { unreadCount: 0 }
+    })
+
+
+    return "success"
+
+  } catch (error: any) {
+    console.error("Error creating form:", error);
+    return false
+  }
+}
+
 
 
 
