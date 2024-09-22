@@ -65,13 +65,6 @@ type Category = Prisma.ResearchCategoryGetPayload<{
   }
 }>
 
-const typeColors = {
-  "University": "bg-blue-500",
-  "Research Institute": "bg-green-500",
-  "Non-Profit Organization": "bg-purple-500",
-  "Hospital": "bg-red-500",
-}
-
 const formSchema = z.object({
   category: z.string().min(2, "First name must be at least 2 characters"),
   description: z.string().min(2, "Last name must be at least 2 characters"),
@@ -171,7 +164,7 @@ export default function Category() {
             </CardHeader>
             <CardContent>
               <div className="flex justify-between items-center mb-4">
-                <Badge className={`${typeColors[category.category as keyof typeof typeColors]} text-white`}>{category.category}</Badge>
+                <Badge className={`bg-[green] text-white`}>{category.category}</Badge>
                 <span className="text-sm text-gray-500 dark:text-gray-400">{category.papers.length} papers</span>
               </div>
             </CardContent>

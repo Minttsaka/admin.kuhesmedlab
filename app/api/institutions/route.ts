@@ -21,7 +21,11 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
-    const institutions = await prisma.institution.findMany();
+    const institutions = await prisma.institution.findMany({
+      include:{
+        research:true
+      }
+    });
     return NextResponse.json(
       institutions
     );

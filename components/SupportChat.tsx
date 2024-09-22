@@ -63,7 +63,6 @@ const SupportChat = ({user}:{user:User}) => {
 
   const handleChatSelect = async (chatId: string) => {
     setSelectedChat(chatId)
-    await axios.put(`/api/chats/${chatId}`)
     messageMutate()
   }
 

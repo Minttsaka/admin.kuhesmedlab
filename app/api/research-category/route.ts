@@ -21,7 +21,11 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
-    const categories = await prisma.researchCategory.findMany();
+    const categories = await prisma.researchCategory.findMany({
+      include:{
+        papers:true
+      }
+    });
     return NextResponse.json(
       categories
     );
