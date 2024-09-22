@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       }
     })
 
-    NextResponse.json({
+    return NextResponse.json({
       id: newMessage.id,
       content: newMessage.content,
       senderId: newMessage.senderId,
