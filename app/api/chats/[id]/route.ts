@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       timestamp: newMessage.createdAt.toISOString(),
     })
   } catch (error) {
-    NextResponse.json({ message: 'Error sending message', error })
+    return NextResponse.json({ message: 'Error sending message', error })
   }
 }
 

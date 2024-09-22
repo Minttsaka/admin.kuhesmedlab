@@ -116,7 +116,7 @@ const SupportChat = ({user}:{user:User}) => {
       {/* Sidebar */}
       {isSidebarOpen && (
         <div className="absolute bottom-16 right-0 w-80 bg-background border rounded-lg shadow-lg overflow-hidden">
-          <div className="p-4 border-b bg-primary text-primary-foreground">
+          <div className="p-4 border-b bg-blue-900 text-primary-foreground">
             <h2 className="text-lg font-semibold">Support Chats</h2>
           </div>
           <ScrollArea className="h-96">
@@ -164,7 +164,7 @@ const SupportChat = ({user}:{user:User}) => {
 
       {/* Individual Chat Popup */}
       {selectedChat && (
-        <div className="fixed bottom-4 right-96 w-96 h-[32rem] bg-blue-900 rounded-lg shadow-lg flex flex-col">
+        <div className="fixed bottom-4 right-96 w-96 h-[32rem] bg-background rounded-lg shadow-lg flex flex-col">
           <div className="p-4 border-b flex justify-between items-center bg-primary text-primary-foreground">
             <div className="flex items-center space-x-3">
               <Avatar className="h-8 w-8">
