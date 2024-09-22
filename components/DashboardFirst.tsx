@@ -29,21 +29,11 @@ type HighCitationsSchema = Prisma.ResearchGetPayload<{
   }
 }>
 
-const trendingData = [
-  { name: 'W1', value: 40 },
-  { name: 'W2', value: 30 },
-  { name: 'W3', value: 45 },
-  { name: 'W4', value: 50 },
-  { name: 'W5', value: 60 },
-  { name: 'W6', value: 65 },
-]
-
-const upcomingEvents = [
-  { date: "July 15", event: "Research Symposium" },
-  { date: "July 22", event: "Grant Proposal Deadline" },
-  { date: "August 5", event: "Peer Review Workshop" },
-]
-
+type Field = Prisma.ResearchCategoryGetPayload<{
+  include:{
+    papers:true
+  }
+}>
 
 export default function DashboardFirst({
   published, 
@@ -53,9 +43,11 @@ export default function DashboardFirst({
   user,
   recentResearch,
   highCitations,
-  paperData
+  paperData,
+  fields
 }:{
     published:number, 
+    fields:Field[],
     pending:Research[], 
     activeSurvey:number, 
     user:number,
@@ -67,6 +59,12 @@ export default function DashboardFirst({
       papers: number;
   }[]
   }) {
+
+    const arrangedFields = fields.map(field => ({ 
+      name: field.label, 
+      value: field.papers.length 
+    }));
+
   return (
       <main className=" ">
         {/* Dashboard Content */}
@@ -141,7 +139,7 @@ export default function DashboardFirst({
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={trendingData}>
+                  <LineChart data={arrangedFields}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />

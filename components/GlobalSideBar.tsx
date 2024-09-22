@@ -55,7 +55,7 @@ export default function GlobalSideBar() {
             <div className="space-y-1">
               <NavItem icon={Home} href="/a/dashboard">Overview</NavItem>
               <NavItem icon={BarChart2} href="/a/department">Departments</NavItem>
-              <NavItem icon={FileText} href="/reports">Reports</NavItem>
+              <NavItem icon={FileText} href="/a/analytics">Reports</NavItem>
             </div>
           </div>
           <div className="px-3 py-2">
@@ -84,7 +84,7 @@ export default function GlobalSideBar() {
               {!collapsed && "Support"}
             </h2>
             <div className="space-y-1">
-              <NavItem icon={HelpCircle} href="#">Help Center</NavItem>
+              <NavItem icon={HelpCircle} href="/a/support">Help Center</NavItem>
             </div>
           </div>
         </div>

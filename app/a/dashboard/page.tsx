@@ -5,7 +5,7 @@ import React from 'react'
 
 export default async function page() {
 
-  const [ published, pending, activeSurvey, users, recentPapers, highCitations, events, newsletterSubscription] = await prisma.$transaction([
+  const [ published, pending, activeSurvey, users, recentPapers, highCitations, events, newsletterSubscription, fields] = await prisma.$transaction([
 
     prisma.research.count({
       where:{
@@ -57,6 +57,15 @@ export default async function page() {
         createdAt:"desc"
       },
       take:3
+    }),
+
+    prisma.researchCategory.findMany({
+      orderBy:{
+        createdAt:"desc"
+      },
+      include:{
+        papers:true
+      }
     })
   ])
 
@@ -92,7 +101,6 @@ export default async function page() {
 const currentYear = new Date().getFullYear();
 const paperData = await getPaperDataByMonth(currentYear);
 
-
   return (
     <div>
       <DashboardFirst 
@@ -104,6 +112,7 @@ const paperData = await getPaperDataByMonth(currentYear);
       recentResearch={recentPapers!}
       highCitations={highCitations!}
       paperData={paperData!}
+      fields={fields!}
        />
        <NewsletterSubscribers subscribers={newsletterSubscription!} />
        <footer className="bg-white dark:bg-gray-800 shadow-md mt-8 py-4">
