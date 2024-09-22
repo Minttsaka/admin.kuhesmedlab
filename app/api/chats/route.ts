@@ -44,7 +44,6 @@ export async function GET() {
         })
     
         const chats = await prisma.chat.findMany({
-          where: { userId: user?.id },
           include: {
             user: {
               select: { id: true, name: true, image: true }
