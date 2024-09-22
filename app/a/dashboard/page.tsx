@@ -106,6 +106,16 @@ const paperData = await getPaperDataByMonth(currentYear);
       paperData={paperData!}
        />
        <NewsletterSubscribers subscribers={newsletterSubscription!} />
+       <footer className="bg-white dark:bg-gray-800 shadow-md mt-8 py-4">
+          <div className="container mx-auto px-6">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                © 2024 KUHESMedLab. All rights reserved.
+              </div>
+              
+            </div>
+          </div>
+        </footer>
     </div>
   )
 }

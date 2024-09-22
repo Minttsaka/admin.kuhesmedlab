@@ -99,7 +99,7 @@ export async function PUT(req: NextRequest) {
     const { chatId } = await req.json()
 
     await prisma.chat.update({
-      where: { id: String(chatId) },
+      where: { id: chatId },
       data: { unreadCount: 0 }
     })
 

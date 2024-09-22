@@ -10,7 +10,6 @@ import { MessageCircle, X, Send, Phone, Video } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import axios from 'axios'
-import { useSession } from 'next-auth/react'
 import { User } from '@prisma/client'
 
 const fetcher = async(url: string) => {
@@ -43,12 +42,12 @@ const SupportChat = ({user}:{user:User}) => {
   const [newMessage, setNewMessage] = useState('')
   const [totalUnreadCount, setTotalUnreadCount] = useState(0)
 
-  const { data: chats, error: chatsError } = useSWR<Chat[]>('/api/chats', fetcher, {
+  const { data: chats, mutate:chatMutate, error: chatsError } = useSWR<Chat[]>('/api/chats', fetcher, {
     refreshInterval: 5000
   })
 
-  const { data: messages, error: messagesError } = useSWR<ChatMessage[]>(
-    selectedChat ? `/api/chats/${selectedChat}` : null,
+  const { data: messages,mutate:messageMutate, error: messagesError } = useSWR<ChatMessage[]>(
+    `/api/chats/${selectedChat}`,
     fetcher,
     { refreshInterval: 1000 }
   )
@@ -64,20 +63,21 @@ const SupportChat = ({user}:{user:User}) => {
 
   const handleChatSelect = async (chatId: string) => {
     setSelectedChat(chatId)
-    // Mark chat as read
     await axios.put(`/api/chats/${chatId}`)
-    mutate('/api/chats') // Refresh chat list
+    messageMutate()
   }
 
   const handleSendMessage = async () => {
     if (newMessage.trim() && selectedChat) {
       try {
-        const response = await axios.post(`/api/chats/${selectedChat}/messages`, {
-          content: newMessage, senderId: user.id })
+        const response = await axios.post(`/api/chats/${selectedChat}`, {
+          content: newMessage, 
+          senderId: user.id 
+        })
         if (response.data) {
           setNewMessage('')
-          mutate(`/api/chats/${selectedChat}`) // Refresh messages
-          mutate('/api/chats') // Refresh chat list
+          chatMutate()
+          messageMutate()
         }
       } catch (error) {
         console.error('Error sending message:', error)

@@ -45,7 +45,6 @@ export async function GET() {
             },
             messages: {
               orderBy: { createdAt: 'desc' },
-              take: 1,
             }
           }
         })
