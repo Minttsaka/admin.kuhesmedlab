@@ -29,21 +29,12 @@ export default function Notifications() {
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [filter, setFilter] = useState("all")
   const [activeTab, setActiveTab] = useState("notifications")
-  const [feedbackMessage, setFeedbackMessage] = useState("")
 
-  const { data: session } = useSession()
-  const user = session?.user as User
 
   const { data: notificationsData, mutate, isLoading: isLoadingNotifications, error: notificationsError } = useSWR<Notification[]>(
     `/api/notification`,
     fetcher
   );
-
-  const { data: feedbackData, mutate:feedbackMutate, isLoading: isLoadingfeedback, error: feedbackError } = useSWR<Feedback[]>(
-    `/api/feedback`,
-    fetcher
-  );
-
 
   const unreadCount = notificationsData?.filter(n => n.status ==="UNREAD").length
 
@@ -112,9 +103,7 @@ export default function Notifications() {
               <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="notifications">Notifications</TabsTrigger>
-                  <TabsTrigger value="feedback">Feedback</TabsTrigger>
                 </TabsList>
-
                 <TabsContent value="notifications" className="flex-grow flex flex-col">
                   <div className="p-4 space-y-4">
                     <div className="relative">
@@ -206,43 +195,6 @@ export default function Notifications() {
                         </Button>
                       </div>
                         </motion.div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </TabsContent>
-
-                <TabsContent value="feedback" className="p-4">
-                  <h3 className="text-xl font-semibold mb-4">Feedback</h3>
-                  <ScrollArea className="flex-grow mt-4">
-                    <div className="space-y-4">
-                      {feedbackData?.map((feedback) => (
-                        <div key={feedback.id} className="bg-gray-800 p-4 rounded-lg">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <p className="text-sm font-semibold">{feedback.name}</p>
-                              {feedback.email && (
-                                <p className="text-xs text-gray-400">{feedback.email}</p>
-                              )}
-                            </div>
-                            <Badge 
-                              variant={
-                                feedback.feedbackType ==="BUG_REPORT" ? 'destructive' : 
-                                feedback.feedbackType === 'FEATURE_REQUEST' ? 'default' : 'secondary'
-                              }
-                            >
-                              {feedback.feedbackType.replace('_', ' ')}
-                            </Badge>
-                          </div>
-                          {feedback.rating !== null && (
-                            <div className="mb-2">
-                              <StarRating rating={feedback.rating} />
-                            </div>
-                          )}
-                          <p className="text-sm">{feedback.comments}</p>
-                          <p className="text-xs text-gray-400 mt-2">
-                            {new Date(feedback.createdAt).toLocaleString()}
-                          </p>
-                        </div>
                       ))}
                     </div>
                   </ScrollArea>
