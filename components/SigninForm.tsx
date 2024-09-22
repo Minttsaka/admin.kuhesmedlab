@@ -27,7 +27,6 @@ export default function SigninForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [loginSuccess, setLoginSuccess] = useState(false)
 
-  const router=useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/'
 
@@ -63,11 +62,10 @@ export default function SigninForm() {
           variant: "default",
         })
         setLoginSuccess(true)
-        router.refresh()
         if(callbackUrl){
-          router.push(callbackUrl)
+          window.location.href = callbackUrl;
         } else{
-          router.push('/a/dashboard') 
+          window.location.href = callbackUrl;
         }
       }
   

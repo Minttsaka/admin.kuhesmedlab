@@ -119,7 +119,7 @@ export default function UserManagement({users}:{users:UserWithPublishedResearch[
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={user.image!} alt={user.name} />
+                      <AvatarImage src={user.image! ?? '/avatar.png'} alt={user.name} />
                       <AvatarFallback>{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                     </Avatar>
                     <div className="ml-4">
@@ -176,7 +176,7 @@ export default function UserManagement({users}:{users:UserWithPublishedResearch[
           <div className="grid gap-4 py-4">
             <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={selectedUser?.image!} alt={selectedUser?.name} />
+                <AvatarImage src={selectedUser?.image! ?? '/avatar.png'} alt={selectedUser?.name} />
                 <AvatarFallback>{selectedUser?.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
               </Avatar>
               <div>

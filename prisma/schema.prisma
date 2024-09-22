@@ -78,10 +78,21 @@ model User {
   collaborator  Collaborator[]
   choices     SurveyFormAnswer[]
   notifications  Notification[]
+  chats     Chat[]
+  messages  Message[]
   accounts      Account[]
   sessions      Session[]
   createdAt     DateTime    @default(now())
 }
+
+model ResearchCategory {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  category      String    
+  description   String
+  papers        Research[]
+  createdAt   DateTime   @default(now())
+}
+
 
 enum ResearchStatus {
   DEVELOPMENT
@@ -96,6 +107,7 @@ model Research {
   slug        String    @unique
   views       Int @default(0)
   creatorId   String
+  categoryId   String
   keyWords    String
   field       String
   citeReference String
@@ -119,6 +131,7 @@ model Research {
   impactMetrics  ResearchImpactMetric[]
   review      Review[]
   surveys     Survey[]
+  category    ResearchCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   authors     String
   files       File[]
   user        User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
@@ -522,6 +535,7 @@ model NewsletterSubscription {
   isSubscribed   Boolean  @default(true)
   preferences    Json?    // Optional: Store any preferences for topics, frequency, etc.
   unsubscribeToken String? // Token to allow for unsubscribing via email
+  createdAt DateTime @default(now())
 }
 
 model Support {
@@ -531,4 +545,25 @@ model Support {
   body    String?
   createdAt DateTime @default(now())
 
+}
+
+model Chat {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  user         User      @relation(fields: [userId], references: [id])
+  userId       String
+  lastMessage  String?
+  unreadCount  Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  messages     Message[]
+}
+
+model Message {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  chatId    String
+  sender    User     @relation(fields: [senderId], references: [id])
+  senderId  String
+  createdAt DateTime @default(now())
 }

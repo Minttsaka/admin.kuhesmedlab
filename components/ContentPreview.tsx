@@ -105,7 +105,7 @@ export default function BlogPreviewModal({ isOpen, onClose, post }: BlogPreviewM
               className="flex items-center space-x-4 mb-6"
             >
               <Avatar>
-                <AvatarImage src={animatedPost?.creatorImage!} alt={animatedPost?.creatorName} />
+                <AvatarImage src={animatedPost?.creatorImage! ?? '/avatar.png'} alt={animatedPost?.creatorName} />
                 <AvatarFallback>{animatedPost?.creatorName.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>

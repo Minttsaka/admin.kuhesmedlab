@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { signJwt, verifyJwt } from "./jwt"
 import { compileActivationTemplate, compileResetPassTemplate, sendMail } from "./mail"
-import { prisma } from "./prisma"
+import prisma from "./prisma"
 import bcrypt from 'bcrypt';
 import { User } from "@prisma/client";
 import { getServerSession } from "next-auth";

@@ -94,7 +94,7 @@ export default function TopBar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.image!} alt="@johndoe" className='object-cover'/>
+                    <AvatarImage src={user?.image! ?? '/avatar.png'} alt="@johndoe" className='object-cover'/>
                     <AvatarFallback>JD</AvatarFallback>
                   </Avatar>
                   <span className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-background"></span>

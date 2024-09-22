@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Switch } from "@/components/ui/switch"
-import { ChevronRight, ChevronLeft, Home, FileText,Building, Users, BarChart2, Book, Calendar, Settings, HelpCircle, LogOut, LucideProps } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Home, FileText,Building, Users, BarChart2, Book, Calendar, Settings, HelpCircle, LogOut, LucideProps, SortDesc } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
 import { User } from '@prisma/client'
 
@@ -65,7 +65,7 @@ export default function GlobalSideBar() {
             <div className="space-y-1">
               <NavItem icon={Book} href="/a/research-papers">Research Library</NavItem>
               <NavItem icon={Book} href="/a/survey">Survey</NavItem>
-              <NavItem icon={Users} href="#">Feedback</NavItem>
+              <NavItem icon={SortDesc} href="/a/category">Research Categories</NavItem>
             </div>
           </div>
           <div className="px-3 py-2">
@@ -95,7 +95,7 @@ export default function GlobalSideBar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="w-full justify-start">
               <Avatar className="h-8 w-8 mr-2">
-                <AvatarImage src={user?.image!} alt="@johndoe" className='object-cover' />
+                <AvatarImage src={user?.image! ?? '/avatar.png'} alt="@johndoe" className='object-cover' />
                 <AvatarFallback>JD</AvatarFallback>
               </Avatar>
               {!collapsed && (

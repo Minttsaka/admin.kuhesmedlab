@@ -1,6 +1,6 @@
 
 import UserManagement from '@/components/UserManagement'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import React from 'react'
 
 export default async function page() {

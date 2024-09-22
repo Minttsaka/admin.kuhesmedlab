@@ -1,10 +1,11 @@
 import DashboardFirst from '@/components/DashboardFirst'
-import { prisma } from '@/lib/prisma'
+import NewsletterSubscribers from '@/components/Subscribers';
+import prisma from '@/lib/prisma'
 import React from 'react'
 
 export default async function page() {
 
-  const [ published, pending, activeSurvey, users, recentPapers, highCitations, events] = await prisma.$transaction([
+  const [ published, pending, activeSurvey, users, recentPapers, highCitations, events, newsletterSubscription] = await prisma.$transaction([
 
     prisma.research.count({
       where:{
@@ -45,6 +46,13 @@ export default async function page() {
       take: 5,
     }),
     prisma.event.findMany({
+      orderBy:{
+        createdAt:"desc"
+      },
+      take:3
+    }),
+
+    prisma.newsletterSubscription.findMany({
       orderBy:{
         createdAt:"desc"
       },
@@ -97,6 +105,7 @@ const paperData = await getPaperDataByMonth(currentYear);
       highCitations={highCitations!}
       paperData={paperData!}
        />
+       <NewsletterSubscribers subscribers={newsletterSubscription!} />
     </div>
   )
 }

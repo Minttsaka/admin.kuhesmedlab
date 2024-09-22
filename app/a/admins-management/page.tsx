@@ -1,5 +1,5 @@
 import ManagementFirst from '@/components/UserManagementFIrst'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import React from 'react'
 
 export default async function page() {

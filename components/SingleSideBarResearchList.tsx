@@ -12,7 +12,7 @@ import { Prisma } from "@prisma/client"
 import Practice from "./Practice"
 import RelatedResearchList from "./RelatedResearchList"
 import ResearchReferencesSection from "./ResearchReference"
-import { prisma } from "@/lib/prisma"
+import prisma from "@/lib/prisma"
 import Link from "next/link"
 
 type ResearchWithUserAndAuthorsPayload = Prisma.ResearchGetPayload<{ 
@@ -58,7 +58,7 @@ export default function SingleSideBarResearchList({research, id }:{research:Rese
                 >
                   <div className="flex items-center">
                     <Avatar className="h-8 w-8 mr-2">
-                      <AvatarImage src={project.user.image!} alt={project.user.name} />
+                      <AvatarImage src={project.user.image! ?? '/avatar.png'} alt={project.user.name} />
                       <AvatarFallback>{project.user.name}</AvatarFallback>
                     </Avatar>
                     <div>

@@ -163,7 +163,7 @@ export default function DashboardFirst({
                   {recentResearch.map((paper, index) => (
                     <Link href={`/a/research-papers/${paper.id}`} key={index} className="flex items-center space-x-4">
                       <Avatar>
-                        <AvatarImage src={paper.user.image!} alt={paper.user.name} />
+                        <AvatarImage src={paper.user.image! ?? '/avatar.png'} alt={paper.user.name} />
                         <AvatarFallback>{paper.user.name}</AvatarFallback>
                       </Avatar>
                       <div>

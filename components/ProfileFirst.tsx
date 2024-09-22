@@ -61,7 +61,7 @@ export default function ProfileFirst({ user }:{user:User}) {
       setIsSaving(true)
       await changeRole(user.id, data)
 
-      router.push('/a/admin-management')
+      router.push('/a/admins-management')
     } catch (error) {
 
       console.log(error)
@@ -115,7 +115,7 @@ export default function ProfileFirst({ user }:{user:User}) {
     <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 min-h-screen">
       <header className="mb-8">
         <h1 className=" font-bold text-gray-800 dark:text-gray-100">Profile</h1>
-        <p className="text-xs text-gray-600 dark:text-gray-300">Welcome back, {user.name}</p>
+        <p className="text-xs text-gray-600 dark:text-gray-300">{user.name}</p>
       </header>
       <Tabs defaultValue="profile" className="space-y-4">
         <TabsList className="grid w-full grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -151,7 +151,7 @@ export default function ProfileFirst({ user }:{user:User}) {
                     </Label>
                     <div className="flex items-center space-x-4">
                       <Avatar className="w-32 h-32">
-                        <AvatarImage src={user.image!} alt={user.name} />
+                        <AvatarImage src={user.image! ?? '/avatar.png'} alt={user.name} />
                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                     </div>

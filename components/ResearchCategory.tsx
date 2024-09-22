@@ -54,16 +54,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { toast } from "@/components/ui/use-toast"
 import { z } from 'zod'
 import { Prisma, Research } from '@prisma/client'
 import { ScrollArea } from './ui/scroll-area'
 import Link from 'next/link'
 
-type Institution = Prisma.InstitutionGetPayload<{
+type Category = Prisma.ResearchCategoryGetPayload<{
   include:{
-    research:true
+    papers:true
   }
 }>
 
@@ -75,11 +73,9 @@ const typeColors = {
 }
 
 const formSchema = z.object({
-  name: z.string().min(2, "First name must be at least 2 characters"),
-  location: z.string().min(2, "Last name must be at least 2 characters"),
-  type: z.enum(["University", "Non-Profit Organization", "Research Institute", "Hospital"]),
-  website: z.string(),
-  logo: z.string().min(2, "Last name must be at least 2 characters"),
+  category: z.string().min(2, "First name must be at least 2 characters"),
+  description: z.string().min(2, "Last name must be at least 2 characters"),
+
 })
 
 const fetcher = async (url:string) => {
@@ -88,34 +84,30 @@ const fetcher = async (url:string) => {
   return res.data;
 };
 
-export default function InstitutionFirst() {
+export default function Category() {
   const [searchTerm, setSearchTerm] = useState("")
   const [typeFilter, setTypeFilter] = useState("All")
-  const [selectedInstitution, setSelectedInstitution] = useState<Institution | null>(null)
-  const [isAddInstitutionOpen, setIsAddInstitutionOpen] = useState(false)
+  const [selectedcategory, setSelectedcategory] = useState<Research[] | null>()
+  const [isAddcategoryOpen, setIsAddcategoryOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      location: "",
-      type: "University",
-      website: "",
-      logo:""
-
+      category: "",
+      description: "",
     },
   })
 
-  const { data, mutate, isLoading, error } = useSWR<Institution[]>(
-    `/api/institutions`,
+  const { data, mutate, isLoading, error } = useSWR<Category[]>(
+    `/api/research-category`,
     fetcher
   );
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
     try {
-      await axios.post('/api/institutions',{
+      await axios.post('/api/research-category',{
         values
       })
       mutate()
@@ -124,25 +116,25 @@ export default function InstitutionFirst() {
       
     } finally{
       setIsSubmitting(false)
-      setIsAddInstitutionOpen(false)
+      setIsAddcategoryOpen(false)
     }
     
   }
 
-  const institutions = Array.isArray(data) ? data : [];
+  const categories = Array.isArray(data) ? data : [];
 
-  const filteredInstitutions = institutions?.filter(institution => 
-    (institution.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     institution.location.toLowerCase().includes(searchTerm.toLowerCase())) &&
-    (typeFilter === "All" || institution.type === typeFilter)
+  const filteredcategories = categories?.filter(category => 
+    (category.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     category.description.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (typeFilter === "All" || category.category === typeFilter)
   )
 
   return (
     <div className=" p-6 bg-gray-100 dark:bg-gray-900 min-h-screen">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Institution Management</h1>
-        <Button onClick={() => setIsAddInstitutionOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Add New Institution
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">category Management</h1>
+        <Button onClick={() => setIsAddcategoryOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" /> Add New category
         </Button>
       </div>
       
@@ -151,7 +143,7 @@ export default function InstitutionFirst() {
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
           <Input
             type="search"
-            placeholder="Search institutions..."
+            placeholder="Search categories..."
             className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -163,40 +155,28 @@ export default function InstitutionFirst() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="All">All Types</SelectItem>
-            {data?.map(institution=>(<SelectItem key={institution.id} value="University">{institution.name}</SelectItem>))}
+            {data?.map(category=>(<SelectItem key={category.id} value="University">{category.category}</SelectItem>))}
           </SelectContent>
         </Select>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredInstitutions.map((institution) => (
-          <Card key={institution.id} className="hover:shadow-lg transition-shadow">
+        {filteredcategories.map((category) => (
+          <Card key={category.id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <div className="flex items-center space-x-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={institution.logo ?? '/avatar.png'} alt={institution.name} />
-                  <AvatarFallback>{institution.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <CardTitle>{institution.name}</CardTitle>
-                  <CardDescription>{institution.location}</CardDescription>
-                </div>
+                  <CardTitle>{category.category}</CardTitle>
+                  <CardDescription>{category.description}</CardDescription>
               </div>
             </CardHeader>
             <CardContent>
               <div className="flex justify-between items-center mb-4">
-                <Badge className={`${typeColors[institution.type as keyof typeof typeColors]} text-white`}>{institution.type}</Badge>
-                <span className="text-sm text-gray-500 dark:text-gray-400">{institution.research.length} papers</span>
-              </div>
-              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                <Globe className="mr-2 h-4 w-4" />
-                <a href={`https://${institution.website}`} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                  {institution.website}
-                </a>
+                <Badge className={`${typeColors[category.category as keyof typeof typeColors]} text-white`}>{category.category}</Badge>
+                <span className="text-sm text-gray-500 dark:text-gray-400">{category.papers.length} papers</span>
               </div>
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Button variant="outline" size="sm" onClick={() => setSelectedInstitution(institution)}>
+              <Button variant="outline" size="sm" onClick={() => setSelectedcategory(category.papers)}>
                 View Papers
               </Button>
               <DropdownMenu>
@@ -217,16 +197,16 @@ export default function InstitutionFirst() {
         ))}
       </div>
 
-      <Dialog open={!!selectedInstitution} onOpenChange={() => setSelectedInstitution(null)}>
+      <Dialog open={!!selectedcategory} onOpenChange={() => setSelectedcategory(null)}>
         <DialogContent className="sm:max-w-[625px]">
           <DialogHeader>
-            <DialogTitle>Research Papers : ({selectedInstitution?.name})</DialogTitle>
+            <DialogTitle>Research Papers</DialogTitle>
             <DialogDescription>
               A list of recent research papers with their abstracts and publication dates.
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className="h-[400px] w-full rounded-md border p-4">
-            {selectedInstitution?.research?.map((paper) => (
+            {selectedcategory?.map((paper) => (
               <div key={paper.id} className="mb-6 last:mb-0">
                 <Link href={`https://kuhesmedlab.vercel.app/publications/${paper.slug}`} className="text-lg font-semibold">{paper.title}</Link>
                 <p className="text-sm text-muted-foreground mt-1">Published on: {paper.createdAt.toDateString()}</p>
@@ -237,12 +217,12 @@ export default function InstitutionFirst() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isAddInstitutionOpen} onOpenChange={setIsAddInstitutionOpen}>
+      <Dialog open={isAddcategoryOpen} onOpenChange={setIsAddcategoryOpen}>
         <DialogContent className="sm:max-w-[625px]">
           <DialogHeader>
-            <DialogTitle>Add New Institution</DialogTitle>
+            <DialogTitle>Add New category</DialogTitle>
             <DialogDescription>
-              Enter the details of the new institution to add it to the system.
+              Enter the details of the new category to add it to the system.
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
@@ -250,12 +230,12 @@ export default function InstitutionFirst() {
               <div className="grid gap-4 py-4">
               <FormField
                 control={form.control}
-                name="name"
+                name="category"
                 render={({ field }) => (
                 <FormItem>
                     <FormLabel>name</FormLabel>
                     <FormControl>
-                    <Input placeholder="Name of institution" {...field} />
+                    <Input placeholder="Name of category" {...field} />
                     </FormControl>
                     <FormMessage />
                 </FormItem>
@@ -263,64 +243,12 @@ export default function InstitutionFirst() {
             />
             <FormField
                 control={form.control}
-                name="location"
+                name="description"
                 render={({ field }) => (
                 <FormItem>
-                  <FormLabel>location</FormLabel>
+                  <FormLabel>description</FormLabel>
                     <FormControl>
-                    <Input placeholder="location of the institution" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
-
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                        <SelectTrigger>
-                        <SelectValue placeholder="Select type of the institution" />
-                        </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="University">University</SelectItem>
-                      <SelectItem value="Research Institute">Research Institute</SelectItem>
-                      <SelectItem value="Non-Profit Organization">Non-Profit Organization</SelectItem>
-                      <SelectItem value="Hospital">Hospital</SelectItem>
-                    </SelectContent>
-                    </Select>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
-
-              <FormField
-                control={form.control}
-                name="website"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Website</FormLabel>
-                    <FormControl>
-                    <Input placeholder="http or https" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
-
-              <FormField
-                control={form.control}
-                name="logo"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Logo</FormLabel>
-                    <FormControl>
-                    <Input placeholder="Enter the url logo(optional)" {...field} />
+                    <Input placeholder="description of the category" {...field} />
                     </FormControl>
                     <FormMessage />
                 </FormItem>
@@ -329,7 +257,7 @@ export default function InstitutionFirst() {
               </div>
               <DialogFooter>
                 <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Adding..." : "Add Institution"}
+                {isSubmitting ? "Adding..." : "Add category"}
                 </Button>
               </DialogFooter>
             </form>

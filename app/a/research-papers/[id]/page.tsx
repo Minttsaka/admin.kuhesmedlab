@@ -1,6 +1,6 @@
 import SingleResearch from '@/components/SingleResearch'
 import SingleSideBarResearchList from '@/components/SingleSideBarResearchList'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import React from 'react'
 
 export default async function page({params:{id}}:{params:{id:string}}) {

@@ -1,10 +1,10 @@
-import InstitutionFirst from '@/components/InstitutionFirst'
+import Category from '@/components/ResearchCategory'
 import React from 'react'
 
 export default function page() {
   return (
     <div>
-        <InstitutionFirst />
+      <Category />
     </div>
   )
 }

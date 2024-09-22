@@ -1,12 +1,12 @@
 "use client"
 
 import React, { useState } from "react"
-import { Prisma } from "@prisma/client"
 import Practice from "./Practice"
 import RelatedResearchList from "./RelatedResearchList"
 import ResearchReferencesSection from "./ResearchReference"
 import Approve from "./Approve"
 import ResearchFiles from "./ResearchFIles"
+import { Prisma } from "@prisma/client"
 
 export type ResearchWithAllRelations = Prisma.ResearchGetPayload<{
   include:{
@@ -41,7 +41,7 @@ export default function SingleResearch({research}:{research:ResearchWithAllRelat
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Main content */}
-      <div className="flex-1 overflow-auto p-6">
+      <div className="w-full p-6">
         <h1 className="mb-4 text-2xl font-bold">Research Review</h1>
         <Practice 
           research={research!}
