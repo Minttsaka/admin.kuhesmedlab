@@ -465,6 +465,7 @@ export default function CreateArticle() {
           </div>
           <div>
           {contentImage && <img src={contentImage} className='object-center h-20 w-20 rounded-lg object-cover'/>}
+          {uploading ?? <Loader2 className="animate-spin" />}
           </div>
           
         </div>
