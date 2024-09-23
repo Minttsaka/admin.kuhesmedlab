@@ -31,7 +31,7 @@ export async function uploadToS3(file:File){
         })
 
         return Promise.resolve({
-           fileKey,
+            fileKey:`https://dct4life-files.s3.af-south-1.amazonaws.com/${fileKey}`,
            fileName:file.name 
         })
     }catch(error){
