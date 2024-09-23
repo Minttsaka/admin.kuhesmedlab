@@ -131,15 +131,21 @@ export default function CreateArticle() {
     }
   }
 
-  const handleimageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleimageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setContentImage( reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    try {
+      if (file) {
+        setUploading(true);
+        const data = await uploadToS3(file)
+          setContentImage(data?.fileKey);
+      }
+      
+    } catch (error) {
+      
+    }finally{
+      setUploading(false);
     }
+    
   };
 
 
