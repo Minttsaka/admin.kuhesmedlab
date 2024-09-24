@@ -45,7 +45,7 @@ export default function CreateArticle({post}:{post:Content}) {
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
-  const [contentImage, setContentImage] = useState<string | undefined>(post.image!);
+  const [contentImage, setContentImage] = useState<string | undefined>(post.image! ?? undefined);
 
   const [videoFileKey, setVideoFileKey] = useState<DataSchema>();
   const [value, setValue] = useState(post.body ?? "");
@@ -53,13 +53,13 @@ export default function CreateArticle({post}:{post:Content}) {
   const [isToggle, setIsToggle] = useState(false);
   const [featuredImgs, setFeaturedImgs] = useState<string[]>(['uploads/1719595146812pngwing.com.png']);
   const [featuredVideo, setFeaturedVideo] = useState<string[]>([]);
-  const [title, setTitle] = useState(post.title!)
+  const [title, setTitle] = useState(post.title ?? "")
   const [selectedType, setSelectedType] = useState<ContentType>(post.type ?? 'BLOG')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [preview, setPreview] = useState<Content>()
   const [isOpen, setIsOpen] = useState(false)
 
-  const [selectedCategories, setSelectedCategories] = useState<string>(post.category!)
+  const [selectedCategories, setSelectedCategories] = useState<string>(post.category ?? null)
   const [newCategory, setNewCategory] = useState("")
   const [isAdding, setIsAdding] = useState(false)
 
