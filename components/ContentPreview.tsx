@@ -19,6 +19,7 @@ interface BlogPreviewModalProps {
 
 export default function BlogPreviewModal({ isOpen, onClose, post }: BlogPreviewModalProps) {
   const [animatedPost, setAnimatedPost] = useState(post)
+  const [isPublishing, setIsPublishing] = useState(false)
 
   const {toast} = useToast()
 
@@ -34,6 +35,7 @@ export default function BlogPreviewModal({ isOpen, onClose, post }: BlogPreviewM
 
     try {
 
+      setIsPublishing(true)
       const data = await publishContent(animatedPost.id)
 
       if(data==="Success"){
@@ -56,6 +58,8 @@ export default function BlogPreviewModal({ isOpen, onClose, post }: BlogPreviewM
       
     } catch (error) {
       
+    } finally{
+      setIsPublishing(false)
     }
 
   }
@@ -149,8 +153,9 @@ export default function BlogPreviewModal({ isOpen, onClose, post }: BlogPreviewM
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Button onClick={onPublish} className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold py-2 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1">
-                Publish Now
+              <Button onClick={onPublish} className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold py-2 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1"
+              disabled={isPublishing}>
+               {isPublishing ? "Publishing..." : "Publish Now"}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </motion.div>

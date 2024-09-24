@@ -425,7 +425,7 @@ model Content {
   comment       Comment[]
   files         File[]
   slug        String   @unique
-  body        String
+  body        String?
   type        ContentType
   publishedAt DateTime?
   createdAt   DateTime @default(now())

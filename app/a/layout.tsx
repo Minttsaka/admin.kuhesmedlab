@@ -1,5 +1,4 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+
 import GlobalSideBar from "@/components/GlobalSideBar";
 import TopBar from "@/components/TopBar";
 import SupportChat from "@/components/SupportChat";

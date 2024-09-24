@@ -232,14 +232,14 @@ export default function DashboardFirst({
              <Link href={`/a/research-papers/${pending.length > 0 ? pending[0].id : ""}`}>
               <Button className="w-full bg-indigo-600 hover:bg-indigo-700">Manage Research Papers</Button>
              </Link>
-             <Link href={`https://kuhesmedlab.vercel.app/mw/research`}>
-              <Button className="w-full bg-pink-600 hover:bg-pink-700">Create Survey</Button>
+             <Link target='__blank'  href={`https://kuhesmedlab.vercel.app/mw/research`}>
+              <Button className="w-full bg-pink-600 hover:bg-pink-700">Create Research</Button>
              </Link>
              <Link href={`/a/events`}>
               <Button className="w-full bg-green-600 hover:bg-green-500">Schedule</Button>
              </Link>
              <Link href={`/a/content/create`}>
-              <Button className="w-full bg-purple-600 hover:bg-purple-500">Create Blog</Button>
+              <Button className="w-full bg-purple-600 hover:bg-purple-500">Create Content</Button>
              </Link>
             </div>
           </div>

@@ -5,7 +5,7 @@ import { signJwt, verifyJwt } from "./jwt"
 import { compileActivationTemplate, compileResetPassTemplate, sendMail } from "./mail"
 import prisma from "./prisma"
 import bcrypt from 'bcrypt';
-import { User } from "@prisma/client";
+import { ContentType, User } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth";
 
@@ -304,19 +304,20 @@ export const resetPassword: ResetPasswordFucn = async (jwtUserId, password) => {
 };
 
 
-const contentTypes = ['BLOG', 'ANNOUNCEMENT', 'DISCOVERY', 'EVENT', 'SUPPORT'] as const
-type ContentType = typeof contentTypes[number]
-type Content ={
-  title:string,
-  image:string,
-  category:string,
-  body:string,
-  slug:string,
-  type:ContentType
-}
+export const saveContent = async(contentData:any)=>{
 
-export const saveContent = async(data:Content)=>{
+  const { title } = contentData
+  const slug =  title.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-").replace(/^-+|-+$/g, "");
 
+  const existSlug = await prisma.content.findUnique({
+    where:{
+      slug
+    }
+  })
+
+  if(existSlug){
+    return existSlug
+  }
 
   const session:any = await getServerSession(authOptions);
   const sessionUser= session.user as User
@@ -329,10 +330,11 @@ export const saveContent = async(data:Content)=>{
     })
     const newContent = await prisma.content.create({
       data:{
-        ...data,
+        ...contentData,
+        slug,
         creatorId:user?.id!,
         updatedAt:new Date(),
-        creatorImage:user?.image! ?? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQleJQOJEcEoPn3WdR2navJFuJOYed8MGf-gQ&s",
+        creatorImage:user?.image!,
         creatorName:user?.name!,
         creatorRole:user?.authority!
       }
@@ -344,6 +346,41 @@ export const saveContent = async(data:Content)=>{
       return newContent
     } 
     
+  } catch (error) {
+
+    console.log(error)
+    
+  }
+}
+
+export const editContent = async(data:any)=>{
+
+  try {
+
+    const newContent = await prisma.content.create({
+      data
+    })
+
+    if(newContent){
+      return newContent
+    } 
+    
+  } catch (error) {
+
+    console.log(error)
+    
+  }
+}
+
+export const deleteContent = async(id:string)=>{
+
+  try {
+
+    await prisma.content.delete({
+      where:{
+        id
+      }
+    })
   } catch (error) {
 
     console.log(error)

@@ -15,7 +15,7 @@ import { toast } from "sonner"
 //import { MultiFiles } from '@/lib/s3MultiFiles';
 import { formats, modules } from "@/lib/quillModules";
 import { useToast } from "./ui/use-toast";
-import { saveContent } from "@/lib/actions";
+import { editContent, saveContent } from "@/lib/actions";
 import { motion, AnimatePresence } from "framer-motion"
 import { Plus, X, Check, Trash2 } from "lucide-react"
 import useSWR from "swr";
@@ -40,22 +40,21 @@ const fetcher = async (url:string) => {
 };
 
 
-export default function CreateArticle() {
+export default function CreateArticle({post}:{post:Content}) {
 
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
-  const [contentImage, setContentImage] = useState<string>();
+  const [contentImage, setContentImage] = useState<string | undefined>(post.image!);
 
   const [videoFileKey, setVideoFileKey] = useState<DataSchema>();
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(post.body ?? "");
   const [uploading, setUploading] = useState(false);
   const [isToggle, setIsToggle] = useState(false);
   const [featuredImgs, setFeaturedImgs] = useState<string[]>(['uploads/1719595146812pngwing.com.png']);
   const [featuredVideo, setFeaturedVideo] = useState<string[]>([]);
-  const [title, setTitle] = useState('')
-  const [body, setBody] = useState('')
-  const [selectedType, setSelectedType] = useState<ContentType>('BLOG')
+  const [title, setTitle] = useState(post.title!)
+  const [selectedType, setSelectedType] = useState<ContentType>(post.type ?? 'BLOG')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [preview, setPreview] = useState<Content>()
   const [isOpen, setIsOpen] = useState(false)
@@ -151,7 +150,6 @@ export default function CreateArticle() {
 
 
   const uploadMultiMedia = async (file:{format:string,file:any})=>{
-    console.log("file",file)
     try {
       setUploading(true);
       const data = "success"
@@ -178,7 +176,6 @@ export default function CreateArticle() {
       image:contentImage!,
       category:selectedCategories?.name!,
       body:value,
-      slug:slugify(title),
       type:selectedType
     }
     try {
@@ -218,7 +215,7 @@ export default function CreateArticle() {
       
     }  
       setIsSubmitting(true)
-      const savedData = await saveContent(data!)
+      const savedData = await editContent(data!)
 
       if(typeof(savedData?.id ) ==="string"){
 
@@ -332,7 +329,7 @@ export default function CreateArticle() {
         )}
       </div>
       <div className="text-center text-sm text-purple-700">
-        Selected: {selectedCategories?.name}
+        Selected: {selectedCategories?.name ?? post.category}
       </div>
     </div>
     <div className='bg-white m-6 p-6 rounded-3xl'>
@@ -436,7 +433,7 @@ export default function CreateArticle() {
                 disabled={isSubmitting}
                 >
                 <Save className="h-5 w-5 mr-2" />
-                Save Draft
+                Edit post
               </Button>
             </div>
         </div>

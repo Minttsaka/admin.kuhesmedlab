@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Switch } from "@/components/ui/switch"
-import { ChevronRight, ChevronLeft, Home, FileText,Building, Users, BarChart2, Book, Calendar, Settings, HelpCircle, LogOut, LucideProps, SortDesc } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Home,Newspaper, FileText,Building, Users, BarChart2, Book, Calendar, Settings, HelpCircle, LogOut, LucideProps, SortDesc } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
 import { User } from '@prisma/client'
 
@@ -65,7 +65,7 @@ export default function GlobalSideBar() {
             <div className="space-y-1">
               <NavItem icon={Book} href="/a/research-papers">Research Library</NavItem>
               <NavItem icon={Book} href="/a/survey">Survey</NavItem>
-              <NavItem icon={Book} href="/a/category">Research Categories</NavItem>
+              <NavItem icon={Book} href="/a/category">Research Field</NavItem>
             </div>
           </div>
           <div className="px-3 py-2">
@@ -75,7 +75,7 @@ export default function GlobalSideBar() {
             <div className="space-y-1">
               <NavItem icon={Calendar} href="/a/events">Schedule</NavItem>
               <NavItem icon={Users} href="/a/admins-management">Team</NavItem>
-              <NavItem icon={Settings} href="#">Settings</NavItem>
+              <NavItem icon={Newspaper} href="/a/content">Content</NavItem>
               <NavItem icon={Building} href="/a/institutions">Institution</NavItem>
             </div>
           </div>
@@ -107,6 +107,11 @@ export default function GlobalSideBar() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuItem>
+              <Link target='__blank' href={`https://kuhesmedlab.vercel.app/mw/dashboard`}>
+                Go to app
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem>
               <Link target='__blank' href={`https://kuhesmedlab.vercel.app/mw/profile`}>
               Profile

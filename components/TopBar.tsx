@@ -102,6 +102,11 @@ export default function TopBar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={()=>signOut()}>Log out</DropdownMenuItem>
+                <DropdownMenuItem>
+                <Link target='__blank' href={`https://kuhesmedlab.vercel.app/mw/dashboard`}>
+                  Go to app
+                </Link>
+              </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
