@@ -59,7 +59,7 @@ export default function CreateArticle({post}:{post:Content}) {
   const [preview, setPreview] = useState<Content>()
   const [isOpen, setIsOpen] = useState(false)
 
-  const [selectedCategories, setSelectedCategories] = useState<string>(post.category)
+  const [selectedCategories, setSelectedCategories] = useState<string>(post.category!)
   const [newCategory, setNewCategory] = useState("")
   const [isAdding, setIsAdding] = useState(false)
 
