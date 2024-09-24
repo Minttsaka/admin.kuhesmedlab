@@ -410,6 +410,7 @@ export default function CreateArticle({post}:{post:Content}) {
                   </div>
                   <Textarea
                     placeholder="Title"
+                    defaultValue={post.title}
                     className='shadow text-3xl w-full h-3 focus-visible:ring-0 border-none bg-gray-100 mx-2'
                     onChange={(e) => setTitle(e.target.value)}
                   ></Textarea>
