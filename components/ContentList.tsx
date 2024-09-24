@@ -146,11 +146,14 @@ interface ContentFormProps {
 
 function ContentForm({  onSave }: ContentFormProps) {
   const [title, setTitle] = useState( "")
+  const [creating, setCreating] = useState(false)
   const [type, setType] = useState<ContentType>( "BLOG")
 
   const handleSubmit = (e: React.FormEvent) => {
+    setCreating(true)
     e.preventDefault()
     onSave({  title, type })
+    setCreating(false)
   }
 
   return (
@@ -185,9 +188,10 @@ function ContentForm({  onSave }: ContentFormProps) {
       </div>
       <Button
         type="submit"
+        disabled={creating}
         className="w-full bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white font-semibold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
       >
-        Save
+        {creating ? "Creating...":"Save"}
       </Button>
     </form>
   )

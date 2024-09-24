@@ -353,11 +353,14 @@ export const saveContent = async(contentData:any)=>{
   }
 }
 
-export const editContent = async(data:any)=>{
+export const editContent = async(slug:string,data:any)=>{
 
   try {
 
-    const newContent = await prisma.content.create({
+    const newContent = await prisma.content.update({
+      where:{
+        slug
+      },
       data
     })
 

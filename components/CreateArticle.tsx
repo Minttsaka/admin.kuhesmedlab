@@ -59,7 +59,7 @@ export default function CreateArticle({post}:{post:Content}) {
   const [preview, setPreview] = useState<Content>()
   const [isOpen, setIsOpen] = useState(false)
 
-  const [selectedCategories, setSelectedCategories] = useState<Category>()
+  const [selectedCategories, setSelectedCategories] = useState<string>(post.category)
   const [newCategory, setNewCategory] = useState("")
   const [isAdding, setIsAdding] = useState(false)
 
@@ -72,7 +72,7 @@ export default function CreateArticle({post}:{post:Content}) {
   
 
   const toggleCategory = (category: Category) => {
-    setSelectedCategories(category)
+    setSelectedCategories(category.name)
   }
 
   const addCategory = async () => {
@@ -174,7 +174,7 @@ export default function CreateArticle({post}:{post:Content}) {
     const data ={
       title,
       image:contentImage!,
-      category:selectedCategories?.name!,
+      category:selectedCategories,
       body:value,
       type:selectedType
     }
@@ -215,7 +215,7 @@ export default function CreateArticle({post}:{post:Content}) {
       
     }  
       setIsSubmitting(true)
-      const savedData = await editContent(data!)
+      const savedData = await editContent(post.slug,data!)
 
       if(typeof(savedData?.id ) ==="string"){
 
@@ -266,16 +266,16 @@ export default function CreateArticle({post}:{post:Content}) {
               className="relative group"
             >
               <Button
-                variant={selectedCategories?.name.includes(category.name) ? "default" : "outline"}
+                variant={selectedCategories.includes(category.name) ? "default" : "outline"}
                 onClick={() => toggleCategory(category)}
                 className={`rounded-full px-4 py-2 ${
-                  selectedCategories?.name.includes(category.name)
+                  selectedCategories.includes(category.name)
                     ? "bg-purple-600 text-white"
                     : "bg-white text-purple-600"
                 }`}
               >
                 {category.name}
-                {selectedCategories?.name.includes(category.name) && (
+                {selectedCategories.includes(category.name) && (
                   <Check className="ml-2 h-4 w-4" />
                 )}
               </Button>
@@ -329,7 +329,7 @@ export default function CreateArticle({post}:{post:Content}) {
         )}
       </div>
       <div className="text-center text-sm text-purple-700">
-        Selected: {selectedCategories?.name ?? post.category}
+        Selected: {selectedCategories ?? post.category}
       </div>
     </div>
     <div className='bg-white m-6 p-6 rounded-3xl'>
