@@ -79,7 +79,7 @@ export default function ContentList({content}:{content:Content[]}) {
   }
 
   return (
-    <div className="container mx-auto p-8 bg-gradient-to-br from-pink-100 to-purple-100 min-h-screen">
+    <div className="p-8  min-h-screen">
       <h1 className="text-4xl font-bold mb-8 text-center text-purple-600 flex items-center justify-center">
         <Sparkles className="mr-2 h-8 w-8" />
         Content Management

@@ -420,7 +420,7 @@ model Content {
   creatorName   String
   creatorImage   String?
   creatorRole   String
-  category      String
+  category      String?
   likes         Like[]
   comment       Comment[]
   files         File[]
