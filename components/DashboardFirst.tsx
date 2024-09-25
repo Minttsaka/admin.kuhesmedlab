@@ -238,8 +238,8 @@ export default function DashboardFirst({
              <Link href={`/a/events`}>
               <Button className="w-full bg-green-600 hover:bg-green-500">Schedule</Button>
              </Link>
-             <Link href={`/a/content/create`}>
-              <Button className="w-full bg-purple-600 hover:bg-purple-500">Create Content</Button>
+             <Link href={`/a/content`}>
+              <Button className="w-full bg-purple-600 hover:bg-purple-500">Contents</Button>
              </Link>
             </div>
           </div>
