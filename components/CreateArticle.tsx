@@ -59,7 +59,7 @@ export default function CreateArticle({post}:{post:Content}) {
   const [preview, setPreview] = useState<Content>()
   const [isOpen, setIsOpen] = useState(false)
 
-  const [selectedCategories, setSelectedCategories] = useState<string>(post?.category! ?? null)
+  const [selectedCategories, setSelectedCategories] = useState<string | undefined>(post?.category! ?? undefined)
   const [newCategory, setNewCategory] = useState("")
   const [isAdding, setIsAdding] = useState(false)
 
@@ -166,8 +166,6 @@ export default function CreateArticle({post}:{post:Content}) {
     }
 
   }
-
-  const slugify = (str:string) =>str.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-").replace(/^-+|-+$/g, "");
   
   const handleSubmit = async () => {
 
@@ -266,16 +264,16 @@ export default function CreateArticle({post}:{post:Content}) {
               className="relative group"
             >
               <Button
-                variant={selectedCategories.includes(category.name) ? "default" : "outline"}
+                variant={selectedCategories?.includes(category.name) ? "default" : "outline"}
                 onClick={() => toggleCategory(category)}
                 className={`rounded-full px-4 py-2 ${
-                  selectedCategories.includes(category.name)
+                  selectedCategories?.includes(category.name)
                     ? "bg-purple-600 text-white"
                     : "bg-white text-purple-600"
                 }`}
               >
                 {category.name}
-                {selectedCategories.includes(category.name) && (
+                {selectedCategories?.includes(category.name) && (
                   <Check className="ml-2 h-4 w-4" />
                 )}
               </Button>
