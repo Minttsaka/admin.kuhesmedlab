@@ -1,4 +1,4 @@
-import EventsFirst from '@/components/EventsFirst'
+
 import dynamic from 'next/dynamic'
 import React from 'react'
 
