@@ -38,7 +38,7 @@ import {
 import useSWR from "swr"
 import { z } from "zod"
 import axios from "axios"
-import { Event } from "@prisma/client"
+import { Event, EventsTypes } from "@prisma/client"
 import { Badge } from "./ui/badge"
 import {
   Card,
@@ -50,12 +50,8 @@ import {
 } from "@/components/ui/card"
 import { motion,} from 'framer-motion'
 import { useToast } from "./ui/use-toast"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 
-const FormSchema = z.object({
-  title: z.string(),
-  location: z.string(),
-  description:z.string()
-});
 
 const fetcher = async (url:string) => {
   const res = await axios.get(url);
@@ -68,6 +64,7 @@ export default function Events() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [date, setDate] = useState<DateRange | undefined>()
   const [newEvent, setNewEvent] = useState<Partial<Event>>({})
+  const [type , setType] = useState<EventsTypes>()
 
   const { toast } = useToast()
 
@@ -96,7 +93,8 @@ export default function Events() {
     if (newEvent.title && newEvent.startDate && newEvent.endDate && newEvent.startTime && newEvent.startTime && value) {
       const eventToSave = {
         ...newEvent,
-        description:value
+        description:value,
+        type
       } as Event
       setIsSubmitting(true)
       await axios.post('/api/event',{
@@ -232,6 +230,21 @@ export default function Events() {
                 onChange={handleInputChange}
                 required
               />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="description" className="block font-medium mb-1">
+                  Type
+                </label>
+              <Select value={type} onValueChange={(e)=>setType(e as EventsTypes)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ORGANIZATION">ORGANIZATION</SelectItem>
+                  <SelectItem value="INSTITUTION">INSTITUTION</SelectItem>
+                  <SelectItem value="GENERAL">GENERAL</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="mb-4">
               <label htmlFor="description" className="block font-medium mb-1">
